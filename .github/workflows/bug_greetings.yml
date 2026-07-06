@@ -66,7 +66,7 @@ jobs:
           const issueNumber = context.payload.issue.number;
           const message = `
           **🛠️ Thank you for reporting a bug!**  
-          Your issue has been successfully submitted and is now awaiting review. We appreciate your help in making Dantotsu better.
+          Your issue has been successfully submitted and is now awaiting review. We appreciate your help in making ReDantotsu better.
           **🔍 What Happens Next**  
           - Our team will investigate the issue and provide updates as soon as possible.  
           - You may be asked for additional details or clarification if needed.  
