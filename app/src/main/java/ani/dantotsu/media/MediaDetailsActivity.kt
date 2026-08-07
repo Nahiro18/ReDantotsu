@@ -125,10 +125,12 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
             }
         }
         
-        // CORRECCIÓN APLICADA AQUÍ:
+        // CORRECCIÓN DE MÁRGENES APLICADA AQUÍ (Sin usar .toPx)
         val marginDp = if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) 8 else 32
+        val marginPx = (marginDp * resources.displayMetrics.density).toInt()
         val navBarRightMargin = if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) navBarHeight else 0
-        val navBarBottomMargin = if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) marginDp.toPx else navBarHeight + marginDp.toPx
+        val navBarBottomMargin = if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) marginPx else navBarHeight + marginPx
+        
         navBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             rightMargin = navBarRightMargin
             bottomMargin = navBarBottomMargin
@@ -411,12 +413,13 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
         }
     }
 
-    // CORRECCIÓN APLICADA AQUÍ:
+    // CORRECCIÓN DE MÁRGENES APLICADA AQUÍ (Sin usar .toPx)
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         val marginDp = if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) 8 else 32
+        val marginPx = (marginDp * resources.displayMetrics.density).toInt()
         val rightMargin = if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) navBarHeight else 0
-        val bottomMargin = if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) marginDp.toPx else navBarHeight + marginDp.toPx
+        val bottomMargin = if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) marginPx else navBarHeight + marginPx
         
         val params: ViewGroup.MarginLayoutParams = navBar.layoutParams as ViewGroup.MarginLayoutParams
         params.updateMargins(right = rightMargin, bottom = bottomMargin)
