@@ -66,7 +66,6 @@ import kotlinx.coroutines.withContext
 import ani.dantotsu.widgets.LiquidGlassBottomBar
 import kotlin.math.abs
 
-
 class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedListener {
     lateinit var launcher: LauncherWrapper
     lateinit var binding: ActivityMediaBinding
@@ -107,7 +106,6 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
         navBar = binding.mediaBottomBar
 
         // Ui init
-
         initActivity(this)
         binding.mediaViewPager.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = navBarHeight
@@ -126,16 +124,16 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
                 navBar.visibility = View.VISIBLE
             }
         }
-        val navBarRightMargin = if (resources.configuration.orientation ==
-            Configuration.ORIENTATION_LANDSCAPE
-        ) navBarHeight else 0
-        val navBarBottomMargin = if (resources.configuration.orientation ==
-            Configuration.ORIENTATION_LANDSCAPE
-        ) 0 else navBarHeight
+        
+        // CORRECCIÓN APLICADA AQUÍ:
+        val marginDp = if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) 8 else 32
+        val navBarRightMargin = if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) navBarHeight else 0
+        val navBarBottomMargin = if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) marginDp.toPx else navBarHeight + marginDp.toPx
         navBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             rightMargin = navBarRightMargin
             bottomMargin = navBarBottomMargin
         }
+        
         binding.mediaBanner.updateLayoutParams { height += statusBarHeight }
         binding.mediaBannerNoKen.updateLayoutParams { height += statusBarHeight }
         binding.mediaClose.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin += statusBarHeight }
@@ -165,7 +163,6 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
         val viewPager = binding.mediaViewPager
         viewPager.isUserInputEnabled = false
         viewPager.setPageTransformer(ZoomOutPageTransformer())
-
 
         val isDownload = intent.getBooleanExtra("download", false)
         media.selected = model.loadSelected(media, isDownload)
@@ -414,16 +411,14 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
         }
     }
 
+    // CORRECCIÓN APLICADA AQUÍ:
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        val rightMargin = if (resources.configuration.orientation ==
-            Configuration.ORIENTATION_LANDSCAPE
-        ) navBarHeight else 0
-        val bottomMargin = if (resources.configuration.orientation ==
-            Configuration.ORIENTATION_LANDSCAPE
-        ) 0 else navBarHeight
-        val params: ViewGroup.MarginLayoutParams =
-            navBar.layoutParams as ViewGroup.MarginLayoutParams
+        val marginDp = if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) 8 else 32
+        val rightMargin = if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) navBarHeight else 0
+        val bottomMargin = if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) marginDp.toPx else navBarHeight + marginDp.toPx
+        
+        val params: ViewGroup.MarginLayoutParams = navBar.layoutParams as ViewGroup.MarginLayoutParams
         params.updateMargins(right = rightMargin, bottom = bottomMargin)
     }
 
@@ -591,4 +586,3 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
         var mediaSingleton: Media? = null
     }
 }
-
