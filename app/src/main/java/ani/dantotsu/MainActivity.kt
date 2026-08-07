@@ -23,6 +23,7 @@ import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
 import androidx.core.view.doOnAttach
 import androidx.core.view.updateLayoutParams
+import androidx.core.view.updateMargins
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -89,7 +90,9 @@ import ani.dantotsu.widgets.LiquidBottomTabs
 import ani.dantotsu.widgets.LiquidBottomTab
 import ani.dantotsu.widgets.GlassSettingsOverlay
 import ani.dantotsu.widgets.GlassSettingsController
+import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -416,7 +419,8 @@ class MainActivity : AppCompatActivity() {
                     "novelyomi" -> PrefName.NovelExtensionRepos to "Novel"
                     else -> throw Exception("Invalid scheme")
                 }
-                val newRepos = PrefManager.getVal<String>(prefName).toMutableSet()
+                val savedRepos = PrefManager.getVal(prefName) as? Set<*> ?: emptySet<String>()
+                val newRepos = savedRepos.map { it.toString() }.toMutableSet()
                 AddRepositoryBottomSheet.addRepoWarning(this) {
                     newRepos.add(url)
                     PrefManager.setVal(prefName, newRepos)
