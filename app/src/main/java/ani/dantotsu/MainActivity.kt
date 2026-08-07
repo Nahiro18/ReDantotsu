@@ -111,14 +111,11 @@ import androidx.compose.ui.Alignment
 import com.kyant.backdrop.backdrops.layerBackdrop
 import java.io.Serializable
 
-
-
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var incognitoLiveData: SharedPreferenceBooleanLiveData
     private val scope = lifecycleScope
     private var load = false
-
 
     @kotlin.OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("InternalInsetResource", "DiscouragedApi")
@@ -128,7 +125,6 @@ class MainActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        //get FRAGMENT_CLASS_NAME from intent
         val fragment = intent.getStringExtra("FRAGMENT_CLASS_NAME")
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -153,8 +149,6 @@ class MainActivity : AppCompatActivity() {
         if (Intent.ACTION_VIEW == intent.action) {
             handleViewIntent(intent)
         }
-
-        // LiquidGlassBottomBar handles its own glass background drawing
 
         val offset = try {
             val statusBarHeightId = resources.getIdentifier("status_bar_height", "dimen", "android")
@@ -189,7 +183,6 @@ class MainActivity : AppCompatActivity() {
                 )
                 slideUpAnim.duration = 200
                 slideUpAnim.start()
-                //wait for animation to finish
                 Handler(Looper.getMainLooper()).postDelayed(
                     { binding.incognito.visibility = View.GONE },
                     200
@@ -254,13 +247,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
         binding.root.doOnAttach {
             initActivity(this)
             val preferences: SourcePreferences = Injekt.get()
-            if (preferences.animeExtensionUpdatesCount()
-                    .get() > 0 || preferences.mangaExtensionUpdatesCount().get() > 0
-            ) {
+            if (preferences.animeExtensionUpdatesCount().get() > 0 || preferences.mangaExtensionUpdatesCount().get() > 0) {
                 snackString(R.string.extension_updates_available)
                     ?.setDuration(Snackbar.LENGTH_SHORT)
                     ?.setAction(R.string.review) {
@@ -280,24 +270,18 @@ class MainActivity : AppCompatActivity() {
             }
             binding.mainProgressBar.visibility = View.GONE
             
-            // Check if Liquid Glass theme is active
             val isLiquidGlassTheme = PrefManager.getVal<String>(PrefName.Theme) == "LIQUID_GLASS"
             
             if (isLiquidGlassTheme) {
-                // Use Compose HorizontalPager for Liquid Glass theme
                 binding.viewpager.visibility = View.GONE
-                binding.includedNavbar.root.visibility = View.GONE // Hide XML navbar
+                binding.includedNavbar.root.visibility = View.GONE
                 binding.composeMainContent.visibility = View.VISIBLE
                 
                 binding.composeMainContent.setContent {
-                    val pagerState = rememberPagerState(
-                        initialPage = selectedOption,
-                        pageCount = { 3 }
-                    )
+                    val pagerState = rememberPagerState(initialPage = selectedOption, pageCount = { 3 })
                     val coroutineScope = rememberCoroutineScope()
-                    val backdrop = rememberLayerBackdrop() // Shared backdrop for glass effect
+                    val backdrop = rememberLayerBackdrop()
 
-                    // Sync pager state to global selectedOption when page changes
                     LaunchedEffect(pagerState.currentPage) {
                         if (selectedOption != pagerState.currentPage) {
                             selectedOption = pagerState.currentPage
@@ -305,13 +289,10 @@ class MainActivity : AppCompatActivity() {
                     }
                     
                     Box(modifier = Modifier.fillMaxSize()) {
-                        // Main content pager captured by backdrop
                         HorizontalPager(
                             state = pagerState,
                             userScrollEnabled = false,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .layerBackdrop(backdrop) // Capture content for glass effect
+                            modifier = Modifier.fillMaxSize().layerBackdrop(backdrop)
                         ) { page ->
                             when (page) {
                                 0 -> AnimePageComposable(supportFragmentManager)
@@ -320,10 +301,8 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
 
-                        // Floating Liquid Bottom Tabs
                         var selectedIndex by remember { mutableIntStateOf(selectedOption) }
 
-                        // Listen to pager changes to update tabs
                         LaunchedEffect(pagerState.currentPage) {
                              selectedIndex = pagerState.currentPage
                         }
@@ -333,16 +312,14 @@ class MainActivity : AppCompatActivity() {
                             onTabSelected = { index ->
                                 selectedIndex = index
                                 selectedOption = index
-                                coroutineScope.launch {
-                                    pagerState.scrollToPage(index)
-                                }
+                                coroutineScope.launch { pagerState.scrollToPage(index) }
                             },
-                            backdrop = backdrop, // Use the captured content
+                            backdrop = backdrop,
                             tabsCount = 3,
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
                                 .padding(bottom = 32.dp, start = 24.dp, end = 24.dp)
-                                .padding(12.dp) // Internal padding for animation clipping
+                                .padding(12.dp)
                         ) {
                             LiquidBottomTab(onClick = {
                                 selectedIndex = 0
@@ -372,7 +349,6 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
 
-                        // Glass Settings Overlay
                         GlassSettingsOverlay(
                             visible = GlassSettingsController.showSettingsOverlay.value,
                             backdrop = backdrop,
@@ -386,7 +362,6 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             } else {
-                // Use ViewPager2 for other themes
                 binding.viewpager.visibility = View.VISIBLE
                 binding.includedNavbar.root.visibility = View.VISIBLE
                 binding.composeMainContent.visibility = View.GONE
@@ -421,11 +396,7 @@ class MainActivity : AppCompatActivity() {
 
                 if (mainViewPager.currentItem != selectedOption) {
                     mainViewPager.post {
-                        mainViewPager.setCurrentItem(
-                            selectedOption,
-                            false
-                        )
-                        // Update navbar selection
+                        mainViewPager.setCurrentItem(selectedOption, false)
                         navbar.selectedItemId = when(selectedOption) {
                             0 -> R.id.anime
                             1 -> R.id.home
@@ -435,8 +406,10 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
+            
+            // CORRECCIÓN APLICADA AQUÍ:
             binding.includedNavbar.navbarContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-       bottomMargin = navBarHeight + 32.toPx
+                bottomMargin = navBarHeight + 32.toPx
             }
         }
 
@@ -459,7 +432,6 @@ class MainActivity : AppCompatActivity() {
                 val feedIntent = Intent(this, FeedActivity::class.java).apply {
                     putExtra("FRAGMENT_TO_LOAD", "NOTIFICATIONS")
                     putExtra("activityId", activityId)
-
                 }
                 launched = true
                 startActivity(feedIntent)
@@ -472,6 +444,7 @@ class MainActivity : AppCompatActivity() {
                 startActivity(notificationIntent)
             }
         }
+        
         val offlineMode: Boolean = PrefManager.getVal(PrefName.OfflineMode)
         if (!isOnline(this)) {
             snackString(this@MainActivity.getString(R.string.no_internet_connection))
@@ -483,7 +456,6 @@ class MainActivity : AppCompatActivity() {
             } else {
                 val model: AnilistHomeViewModel by viewModels()
 
-                //Load Data
                 if (!load && !launched) {
                     scope.launch(Dispatchers.IO) {
                         model.loadMain(this@MainActivity)
@@ -529,9 +501,7 @@ class MainActivity : AppCompatActivity() {
                             title = "Allow ReDantotsu to automatically open Anilist & MAL Links?"
                             val md = "Open settings & click +Add Links & select Anilist & Mal urls"
                             addView(TextView(this@MainActivity).apply {
-                                val markWon =
-                                    Markwon.builder(this@MainActivity)
-                                        .usePlugin(SoftBreakAddsNewLinePlugin.create()).build()
+                                val markWon = Markwon.builder(this@MainActivity).usePlugin(SoftBreakAddsNewLinePlugin.create()).build()
                                 markWon.setMarkdown(this, md)
                             })
 
@@ -585,12 +555,13 @@ class MainActivity : AppCompatActivity() {
         window.navigationBarColor = ContextCompat.getColor(this, android.R.color.transparent)
     }
 
+    // CORRECCIÓN APLICADA AQUÍ:
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        val margin = if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) 8 else 32
+        val marginDp = if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) 8 else 32
         val params: ViewGroup.MarginLayoutParams =
             binding.includedNavbar.navbarContainer.layoutParams as ViewGroup.MarginLayoutParams
-        params.updateMargins(bottom = margin.toPx)
+        params.updateMargins(bottom = navBarHeight + marginDp.toPx)
     }
 
     private fun handleViewIntent(intent: Intent) {
@@ -614,28 +585,20 @@ class MainActivity : AppCompatActivity() {
                     PrefManager.setVal(prefName, newRepos)
                     toast("$name Extension Repo added")
                 }
-
                 return
             }
 
             if (intent.type == null) return
-            val jsonString =
-                contentResolver.openInputStream(uri)?.readBytes()
-                    ?: throw Exception("Error reading file")
-            val name =
-                DocumentFile.fromSingleUri(this, uri)?.name ?: "settings"
-            //.sani is encrypted, .ani is not
+            val jsonString = contentResolver.openInputStream(uri)?.readBytes() ?: throw Exception("Error reading file")
+            val name = DocumentFile.fromSingleUri(this, uri)?.name ?: "settings"
+            
             if (name.endsWith(".sani")) {
                 passwordAlertDialog { password ->
                     if (password != null) {
                         val salt = jsonString.copyOfRange(0, 16)
                         val encrypted = jsonString.copyOfRange(16, jsonString.size)
                         val decryptedJson = try {
-                            PreferenceKeystore.decryptWithPassword(
-                                password,
-                                encrypted,
-                                salt
-                            )
+                            PreferenceKeystore.decryptWithPassword(password, encrypted, salt)
                         } catch (e: Exception) {
                             toast("Incorrect password")
                             return@passwordAlertDialog
@@ -668,7 +631,6 @@ class MainActivity : AppCompatActivity() {
     private fun passwordAlertDialog(callback: (CharArray?) -> Unit) {
         val password = CharArray(16).apply { fill('0') }
 
-        // Inflate the dialog layout
         val dialogView = DialogUserAgentBinding.inflate(layoutInflater).apply {
             userAgentTextBox.hint = "Password"
             subtitle.visibility = View.VISIBLE
@@ -694,7 +656,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    //ViewPager
     private class ViewPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) :
         FragmentStateAdapter(fragmentManager, lifecycle) {
 
@@ -709,6 +670,4 @@ class MainActivity : AppCompatActivity() {
             return LoginFragment()
         }
     }
-
 }
-
