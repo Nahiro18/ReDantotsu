@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.drawable.Animatable
-import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -14,8 +13,6 @@ import android.os.Looper
 import android.provider.Settings
 import android.view.View
 import android.view.ViewGroup
-import eightbitlab.com.blurview.BlurView
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import android.view.animation.AnticipateInterpolator
 import android.widget.TextView
 import androidx.activity.addCallback
@@ -26,7 +23,6 @@ import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
 import androidx.core.view.doOnAttach
 import androidx.core.view.updateLayoutParams
-import androidx.core.view.updateMargins
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -93,7 +89,6 @@ import ani.dantotsu.widgets.LiquidBottomTabs
 import ani.dantotsu.widgets.LiquidBottomTab
 import ani.dantotsu.widgets.GlassSettingsOverlay
 import ani.dantotsu.widgets.GlassSettingsController
-import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.foundation.pager.HorizontalPager
@@ -108,7 +103,6 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.Alignment
-import com.kyant.backdrop.backdrops.layerBackdrop
 import java.io.Serializable
 
 class MainActivity : AppCompatActivity() {
@@ -122,11 +116,9 @@ class MainActivity : AppCompatActivity() {
     @OptIn(UnstableApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeManager(this).applyTheme()
-
         super.onCreate(savedInstanceState)
 
         val fragment = intent.getStringExtra("FRAGMENT_CLASS_NAME")
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -134,77 +126,45 @@ class MainActivity : AppCompatActivity() {
         if (!CalcActivity.hasPermission) {
             val pin: String = PrefManager.getVal(PrefName.AppPassword)
             if (pin.isNotEmpty()) {
-                ContextCompat.startActivity(
-                    this@MainActivity,
-                    Intent(this@MainActivity, CalcActivity::class.java)
-                        .putExtra("code", pin)
-                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK),
-                    null
-                )
+                ContextCompat.startActivity(this@MainActivity, Intent(this@MainActivity, CalcActivity::class.java).putExtra("code", pin).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK), null)
                 finish()
                 return
             }
         }
 
-        if (Intent.ACTION_VIEW == intent.action) {
-            handleViewIntent(intent)
-        }
+        if (Intent.ACTION_VIEW == intent.action) handleViewIntent(intent)
 
         val offset = try {
             val statusBarHeightId = resources.getIdentifier("status_bar_height", "dimen", "android")
             resources.getDimensionPixelSize(statusBarHeightId)
-        } catch (e: Exception) {
-            statusBarHeight
-        }
+        } catch (e: Exception) { statusBarHeight }
+        
         val layoutParams = binding.incognito.layoutParams as ViewGroup.MarginLayoutParams
         layoutParams.topMargin = 11 * offset / 12
         binding.incognito.layoutParams = layoutParams
-        incognitoLiveData = PrefManager.getLiveVal(
-            PrefName.Incognito,
-            false
-        ).asLiveBool()
+        
+        incognitoLiveData = PrefManager.getLiveVal(PrefName.Incognito, false).asLiveBool()
         incognitoLiveData.observe(this) {
             if (it) {
-                val slideDownAnim = ObjectAnimator.ofFloat(
-                    binding.incognito,
-                    View.TRANSLATION_Y,
-                    -(binding.incognito.height.toFloat() + statusBarHeight),
-                    0f
-                )
-                slideDownAnim.duration = 200
-                slideDownAnim.start()
+                ObjectAnimator.ofFloat(binding.incognito, View.TRANSLATION_Y, -(binding.incognito.height.toFloat() + statusBarHeight), 0f).apply { duration = 200; start() }
                 binding.incognito.visibility = View.VISIBLE
             } else {
-                val slideUpAnim = ObjectAnimator.ofFloat(
-                    binding.incognito,
-                    View.TRANSLATION_Y,
-                    0f,
-                    -(binding.incognito.height.toFloat() + statusBarHeight)
-                )
-                slideUpAnim.duration = 200
-                slideUpAnim.start()
-                Handler(Looper.getMainLooper()).postDelayed(
-                    { binding.incognito.visibility = View.GONE },
-                    200
-                )
+                ObjectAnimator.ofFloat(binding.incognito, View.TRANSLATION_Y, 0f, -(binding.incognito.height.toFloat() + statusBarHeight)).apply { duration = 200; start() }
+                Handler(Looper.getMainLooper()).postDelayed({ binding.incognito.visibility = View.GONE }, 200)
             }
         }
         incognitoNotification(this)
 
         var doubleBackToExitPressedOnce = false
         onBackPressedDispatcher.addCallback(this) {
-            if (doubleBackToExitPressedOnce) {
-                finish()
-            }
+            if (doubleBackToExitPressedOnce) finish()
             doubleBackToExitPressedOnce = true
-            snackString(this@MainActivity.getString(R.string.back_to_exit)).apply {
-                this?.addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
-                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                        super.onDismissed(transientBottomBar, event)
-                        doubleBackToExitPressedOnce = false
-                    }
-                })
-            }
+            snackString(this@MainActivity.getString(R.string.back_to_exit))?.addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                    super.onDismissed(transientBottomBar, event)
+                    doubleBackToExitPressedOnce = false
+                }
+            })
         }
 
         binding.root.isMotionEventSplittingEnabled = false
@@ -214,15 +174,8 @@ class MainActivity : AppCompatActivity() {
                 val splash = SplashScreenBinding.inflate(layoutInflater)
                 binding.root.addView(splash.root)
                 (splash.splashImage.drawable as? Animatable)?.start()
-
                 delay(1200)
-
-                ObjectAnimator.ofFloat(
-                    splash.root,
-                    View.TRANSLATION_Y,
-                    0f,
-                    -splash.root.height.toFloat()
-                ).apply {
+                ObjectAnimator.ofFloat(splash.root, View.TRANSLATION_Y, 0f, -splash.root.height.toFloat()).apply {
                     interpolator = AnticipateInterpolator()
                     duration = 200L
                     doOnEnd { binding.root.removeView(splash.root) }
@@ -233,12 +186,7 @@ class MainActivity : AppCompatActivity() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             splashScreen.setOnExitAnimationListener { splashScreenView ->
-                ObjectAnimator.ofFloat(
-                    splashScreenView,
-                    View.TRANSLATION_Y,
-                    0f,
-                    -splashScreenView.height.toFloat()
-                ).apply {
+                ObjectAnimator.ofFloat(splashScreenView, View.TRANSLATION_Y, 0f, -splashScreenView.height.toFloat()).apply {
                     interpolator = AnticipateInterpolator()
                     duration = 200L
                     doOnEnd { splashScreenView.remove() }
@@ -251,13 +199,10 @@ class MainActivity : AppCompatActivity() {
             initActivity(this)
             val preferences: SourcePreferences = Injekt.get()
             if (preferences.animeExtensionUpdatesCount().get() > 0 || preferences.mangaExtensionUpdatesCount().get() > 0) {
-                snackString(R.string.extension_updates_available)
-                    ?.setDuration(Snackbar.LENGTH_SHORT)
-                    ?.setAction(R.string.review) {
-                        startActivity(Intent(this, ExtensionsActivity::class.java))
-                    }
+                snackString(R.string.extension_updates_available)?.setDuration(Snackbar.LENGTH_SHORT)?.setAction(R.string.review) { startActivity(Intent(this, ExtensionsActivity::class.java)) }
             }
             window.navigationBarColor = ContextCompat.getColor(this, android.R.color.transparent)
+            
             selectedOption = if (fragment != null) {
                 when (fragment) {
                     AnimeFragment::class.java.name -> 0
@@ -283,17 +228,11 @@ class MainActivity : AppCompatActivity() {
                     val backdrop = rememberLayerBackdrop()
 
                     LaunchedEffect(pagerState.currentPage) {
-                        if (selectedOption != pagerState.currentPage) {
-                            selectedOption = pagerState.currentPage
-                        }
+                        if (selectedOption != pagerState.currentPage) selectedOption = pagerState.currentPage
                     }
                     
                     Box(modifier = Modifier.fillMaxSize()) {
-                        HorizontalPager(
-                            state = pagerState,
-                            userScrollEnabled = false,
-                            modifier = Modifier.fillMaxSize().layerBackdrop(backdrop)
-                        ) { page ->
+                        HorizontalPager(state = pagerState, userScrollEnabled = false, modifier = Modifier.fillMaxSize().layerBackdrop(backdrop)) { page ->
                             when (page) {
                                 0 -> AnimePageComposable(supportFragmentManager)
                                 1 -> HomePageComposable(supportFragmentManager)
@@ -302,10 +241,7 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         var selectedIndex by remember { mutableIntStateOf(selectedOption) }
-
-                        LaunchedEffect(pagerState.currentPage) {
-                             selectedIndex = pagerState.currentPage
-                        }
+                        LaunchedEffect(pagerState.currentPage) { selectedIndex = pagerState.currentPage }
 
                         LiquidBottomTabs(
                             selectedTabIndex = { selectedIndex },
@@ -316,34 +252,17 @@ class MainActivity : AppCompatActivity() {
                             },
                             backdrop = backdrop,
                             tabsCount = 3,
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(bottom = 32.dp, start = 24.dp, end = 24.dp)
-                                .padding(12.dp)
+                            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 32.dp, start = 24.dp, end = 24.dp).padding(12.dp)
                         ) {
-                            LiquidBottomTab(onClick = {
-                                selectedIndex = 0
-                                selectedOption = 0
-                                coroutineScope.launch { pagerState.scrollToPage(0) }
-                            }) {
+                            LiquidBottomTab(onClick = { selectedIndex = 0; selectedOption = 0; coroutineScope.launch { pagerState.scrollToPage(0) } }) {
                                 Icon(painterResource(R.drawable.ic_round_movie_filter_24), contentDescription = stringResource(R.string.anime))
                                 Text(stringResource(R.string.anime))
                             }
-
-                            LiquidBottomTab(onClick = {
-                                selectedIndex = 1
-                                selectedOption = 1
-                                coroutineScope.launch { pagerState.scrollToPage(1) }
-                            }) {
+                            LiquidBottomTab(onClick = { selectedIndex = 1; selectedOption = 1; coroutineScope.launch { pagerState.scrollToPage(1) } }) {
                                 Icon(painterResource(R.drawable.ic_round_home_24), contentDescription = stringResource(R.string.home))
                                 Text(stringResource(R.string.home))
                             }
-
-                            LiquidBottomTab(onClick = {
-                                selectedIndex = 2
-                                selectedOption = 2
-                                coroutineScope.launch { pagerState.scrollToPage(2) }
-                            }) {
+                            LiquidBottomTab(onClick = { selectedIndex = 2; selectedOption = 2; coroutineScope.launch { pagerState.scrollToPage(2) } }) {
                                 Icon(painterResource(R.drawable.ic_round_import_contacts_24), contentDescription = stringResource(R.string.manga))
                                 Text(stringResource(R.string.manga))
                             }
@@ -353,11 +272,7 @@ class MainActivity : AppCompatActivity() {
                             visible = GlassSettingsController.showSettingsOverlay.value,
                             backdrop = backdrop,
                             onDismiss = { GlassSettingsController.hide() },
-                            onLogout = {
-                                Anilist.removeSavedToken()
-                                startMainActivity(this@MainActivity)
-                                GlassSettingsController.hide()
-                            }
+                            onLogout = { Anilist.removeSavedToken(); startMainActivity(this@MainActivity); GlassSettingsController.hide() }
                         )
                     }
                 }
@@ -375,21 +290,9 @@ class MainActivity : AppCompatActivity() {
 
                 navbar.setOnItemSelectedListener { item ->
                     when (item.itemId) {
-                        R.id.anime -> {
-                            selectedOption = 0
-                            mainViewPager.setCurrentItem(0, false)
-                            true
-                        }
-                        R.id.home -> {
-                            selectedOption = 1
-                            mainViewPager.setCurrentItem(1, false)
-                            true
-                        }
-                        R.id.manga -> {
-                            selectedOption = 2
-                            mainViewPager.setCurrentItem(2, false)
-                            true
-                        }
+                        R.id.anime -> { selectedOption = 0; mainViewPager.setCurrentItem(0, false); true }
+                        R.id.home -> { selectedOption = 1; mainViewPager.setCurrentItem(1, false); true }
+                        R.id.manga -> { selectedOption = 2; mainViewPager.setCurrentItem(2, false); true }
                         else -> false
                     }
                 }
@@ -397,17 +300,12 @@ class MainActivity : AppCompatActivity() {
                 if (mainViewPager.currentItem != selectedOption) {
                     mainViewPager.post {
                         mainViewPager.setCurrentItem(selectedOption, false)
-                        navbar.selectedItemId = when(selectedOption) {
-                            0 -> R.id.anime
-                            1 -> R.id.home
-                            2 -> R.id.manga
-                            else -> R.id.home
-                        }
+                        navbar.selectedItemId = when(selectedOption) { 0 -> R.id.anime; 1 -> R.id.home; 2 -> R.id.manga; else -> R.id.home }
                     }
                 }
             }
             
-            // CORRECCIÓN APLICADA AQUÍ:
+            // CORRECCIÓN DE MÁRGENES APLICADA AQUÍ
             binding.includedNavbar.navbarContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = navBarHeight + 32.toPx
             }
@@ -421,133 +319,76 @@ class MainActivity : AppCompatActivity() {
             val activityId = extras.getInt("activityId", -1)
 
             if (fragmentToLoad != null && mediaId != -1 && commentId != -1) {
-                val detailIntent = Intent(this, MediaDetailsActivity::class.java).apply {
-                    putExtra("FRAGMENT_TO_LOAD", fragmentToLoad)
-                    putExtra("mediaId", mediaId)
-                    putExtra("commentId", commentId)
-                }
+                startActivity(Intent(this, MediaDetailsActivity::class.java).apply { putExtra("FRAGMENT_TO_LOAD", fragmentToLoad); putExtra("mediaId", mediaId); putExtra("commentId", commentId) })
                 launched = true
-                startActivity(detailIntent)
             } else if (fragmentToLoad == "FEED" && activityId != -1) {
-                val feedIntent = Intent(this, FeedActivity::class.java).apply {
-                    putExtra("FRAGMENT_TO_LOAD", "NOTIFICATIONS")
-                    putExtra("activityId", activityId)
-                }
+                startActivity(Intent(this, FeedActivity::class.java).apply { putExtra("FRAGMENT_TO_LOAD", "NOTIFICATIONS"); putExtra("activityId", activityId) })
                 launched = true
-                startActivity(feedIntent)
             } else if (fragmentToLoad == "NOTIFICATIONS" && activityId != -1) {
                 Logger.log("MainActivity, onCreate: $activityId")
-                val notificationIntent = Intent(this, NotificationActivity::class.java).apply {
-                    putExtra("activityId", activityId)
-                }
+                startActivity(Intent(this, NotificationActivity::class.java).apply { putExtra("activityId", activityId) })
                 launched = true
-                startActivity(notificationIntent)
             }
         }
         
         val offlineMode: Boolean = PrefManager.getVal(PrefName.OfflineMode)
-        if (!isOnline(this)) {
+        if (!isOnline(this) || offlineMode) {
             snackString(this@MainActivity.getString(R.string.no_internet_connection))
             startActivity(Intent(this, NoInternet::class.java))
         } else {
-            if (offlineMode) {
-                snackString(this@MainActivity.getString(R.string.no_internet_connection))
-                startActivity(Intent(this, NoInternet::class.java))
-            } else {
-                val model: AnilistHomeViewModel by viewModels()
-
-                if (!load && !launched) {
-                    scope.launch(Dispatchers.IO) {
-                        model.loadMain(this@MainActivity)
-                        val id = intent.extras?.getInt("mediaId", 0)
-                        val isMAL = intent.extras?.getBoolean("mal") ?: false
-                        val cont = intent.extras?.getBoolean("continue") ?: false
-                        if (id != null && id != 0) {
-                            val media = withContext(Dispatchers.IO) {
-                                Anilist.query.getMedia(id, isMAL)
-                            }
-                            if (media != null) {
-                                media.cameFromContinue = cont
-                                startActivity(
-                                    Intent(this@MainActivity, MediaDetailsActivity::class.java)
-                                        .putExtra("media", media as Serializable)
-                                )
-                            } else {
-                                snackString(this@MainActivity.getString(R.string.anilist_not_found))
-                            }
-                        }
-                        val username = intent.extras?.getString("username")
-                        if (username != null) {
-                            val nameInt = username.toIntOrNull()
-                            if (nameInt != null) {
-                                startActivity(
-                                    Intent(this@MainActivity, ProfileActivity::class.java)
-                                        .putExtra("userId", nameInt)
-                                )
-                            } else {
-                                startActivity(
-                                    Intent(this@MainActivity, ProfileActivity::class.java)
-                                        .putExtra("username", username)
-                                )
-                            }
+            val model: AnilistHomeViewModel by viewModels()
+            if (!load && !launched) {
+                scope.launch(Dispatchers.IO) {
+                    model.loadMain(this@MainActivity)
+                    val id = intent.extras?.getInt("mediaId", 0)
+                    val isMAL = intent.extras?.getBoolean("mal") ?: false
+                    val cont = intent.extras?.getBoolean("continue") ?: false
+                    if (id != null && id != 0) {
+                        val media = withContext(Dispatchers.IO) { Anilist.query.getMedia(id, isMAL) }
+                        if (media != null) {
+                            media.cameFromContinue = cont
+                            startActivity(Intent(this@MainActivity, MediaDetailsActivity::class.java).putExtra("media", media as Serializable))
+                        } else {
+                            snackString(this@MainActivity.getString(R.string.anilist_not_found))
                         }
                     }
-                    load = true
-                }
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    if (!(PrefManager.getVal(PrefName.AllowOpeningLinks) as Boolean)) {
-                        CustomBottomDialog.newInstance().apply {
-                            title = "Allow ReDantotsu to automatically open Anilist & MAL Links?"
-                            val md = "Open settings & click +Add Links & select Anilist & Mal urls"
-                            addView(TextView(this@MainActivity).apply {
-                                val markWon = Markwon.builder(this@MainActivity).usePlugin(SoftBreakAddsNewLinePlugin.create()).build()
-                                markWon.setMarkdown(this, md)
-                            })
-
-                            setNegativeButton(this@MainActivity.getString(R.string.no)) {
-                                PrefManager.setVal(PrefName.AllowOpeningLinks, true)
-                                dismiss()
-                            }
-
-                            setPositiveButton(this@MainActivity.getString(R.string.yes)) {
-                                PrefManager.setVal(PrefName.AllowOpeningLinks, true)
-                                tryWith(true) {
-                                    startActivity(
-                                        Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS)
-                                            .setData(Uri.parse("package:$packageName"))
-                                    )
-                                }
-                                dismiss()
-                            }
-                        }.show(supportFragmentManager, "dialog")
+                    val username = intent.extras?.getString("username")
+                    if (username != null) {
+                        val nameInt = username.toIntOrNull()
+                        if (nameInt != null) startActivity(Intent(this@MainActivity, ProfileActivity::class.java).putExtra("userId", nameInt))
+                        else startActivity(Intent(this@MainActivity, ProfileActivity::class.java).putExtra("username", username))
                     }
                 }
+                load = true
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !(PrefManager.getVal(PrefName.AllowOpeningLinks) as Boolean)) {
+                CustomBottomDialog.newInstance().apply {
+                    title = "Allow ReDantotsu to automatically open Anilist & MAL Links?"
+                    addView(TextView(this@MainActivity).apply {
+                        Markwon.builder(this@MainActivity).usePlugin(SoftBreakAddsNewLinePlugin.create()).build().setMarkdown(this, "Open settings & click +Add Links & select Anilist & Mal urls")
+                    })
+                    setNegativeButton(this@MainActivity.getString(R.string.no)) { PrefManager.setVal(PrefName.AllowOpeningLinks, true); dismiss() }
+                    setPositiveButton(this@MainActivity.getString(R.string.yes)) {
+                        PrefManager.setVal(PrefName.AllowOpeningLinks, true)
+                        tryWith(true) { startActivity(Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS).setData(Uri.parse("package:$packageName"))) }
+                        dismiss()
+                    }
+                }.show(supportFragmentManager, "dialog")
             }
         }
-        if (PrefManager.getVal(PrefName.OC)) {
-            AudioHelper.run(this, R.raw.audio)
-            PrefManager.setVal(PrefName.OC, false)
-        }
+        
+        if (PrefManager.getVal(PrefName.OC)) { AudioHelper.run(this, R.raw.audio); PrefManager.setVal(PrefName.OC, false) }
+        
         val torrentManager = Injekt.get<TorrentAddonManager>()
         fun startTorrent() {
             if (torrentManager.isAvailable() && PrefManager.getVal(PrefName.TorrentEnabled)) {
-                launchIO {
-                    if (!TorrentServerService.isRunning()) {
-                        TorrentServerService.start()
-                    }
-                }
+                launchIO { if (!TorrentServerService.isRunning()) TorrentServerService.start() }
             }
         }
         if (torrentManager.isInitialized.value == false) {
-            torrentManager.isInitialized.observe(this) {
-                if (it) {
-                    startTorrent()
-                }
-            }
-        } else {
-            startTorrent()
-        }
+            torrentManager.isInitialized.observe(this) { if (it) startTorrent() }
+        } else { startTorrent() }
     }
 
     override fun onRestart() {
@@ -555,21 +396,18 @@ class MainActivity : AppCompatActivity() {
         window.navigationBarColor = ContextCompat.getColor(this, android.R.color.transparent)
     }
 
-    // CORRECCIÓN APLICADA AQUÍ:
+    // CORRECCIÓN DE MÁRGENES APLICADA AQUÍ
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         val marginDp = if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) 8 else 32
-        val params: ViewGroup.MarginLayoutParams =
-            binding.includedNavbar.navbarContainer.layoutParams as ViewGroup.MarginLayoutParams
+        val params: ViewGroup.MarginLayoutParams = binding.includedNavbar.navbarContainer.layoutParams as ViewGroup.MarginLayoutParams
         params.updateMargins(bottom = navBarHeight + marginDp.toPx)
     }
 
     private fun handleViewIntent(intent: Intent) {
         val uri: Uri? = intent.data
         try {
-            if (uri == null) {
-                throw Exception("Uri is null")
-            }
+            if (uri == null) throw Exception("Uri is null")
             if ((uri.scheme == "tachiyomi" || uri.scheme == "aniyomi" || uri.scheme == "novelyomi") && uri.host == "add-repo") {
                 val url = uri.getQueryParameter("url") ?: throw Exception("No url for repo import")
                 val (prefName, name) = when (uri.scheme) {
@@ -578,8 +416,7 @@ class MainActivity : AppCompatActivity() {
                     "novelyomi" -> PrefName.NovelExtensionRepos to "Novel"
                     else -> throw Exception("Invalid scheme")
                 }
-                val savedRepos: Set<String> = PrefManager.getVal(prefName)
-                val newRepos = savedRepos.toMutableSet()
+                val newRepos = PrefManager.getVal<String>(prefName).toMutableSet()
                 AddRepositoryBottomSheet.addRepoWarning(this) {
                     newRepos.add(url)
                     PrefManager.setVal(prefName, newRepos)
@@ -597,40 +434,18 @@ class MainActivity : AppCompatActivity() {
                     if (password != null) {
                         val salt = jsonString.copyOfRange(0, 16)
                         val encrypted = jsonString.copyOfRange(16, jsonString.size)
-                        val decryptedJson = try {
-                            PreferenceKeystore.decryptWithPassword(password, encrypted, salt)
-                        } catch (e: Exception) {
-                            toast("Incorrect password")
-                            return@passwordAlertDialog
-                        }
-                        if (PreferencePackager.unpack(decryptedJson)) {
-                            val newIntent = Intent(this, this.javaClass)
-                            this.finish()
-                            startActivity(newIntent)
-                        }
-                    } else {
-                        toast("Password cannot be empty")
-                    }
+                        val decryptedJson = try { PreferenceKeystore.decryptWithPassword(password, encrypted, salt) } catch (e: Exception) { toast("Incorrect password"); return@passwordAlertDialog }
+                        if (PreferencePackager.unpack(decryptedJson)) { finish(); startActivity(Intent(this, this.javaClass)) }
+                    } else { toast("Password cannot be empty") }
                 }
             } else if (name.endsWith(".ani")) {
-                val decryptedJson = jsonString.toString(Charsets.UTF_8)
-                if (PreferencePackager.unpack(decryptedJson)) {
-                    val newIntent = Intent(this, this.javaClass)
-                    this.finish()
-                    startActivity(newIntent)
-                }
-            } else {
-                toast("Invalid file type")
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            toast("Error importing settings")
-        }
+                if (PreferencePackager.unpack(jsonString.toString(Charsets.UTF_8))) { finish(); startActivity(Intent(this, this.javaClass)) }
+            } else { toast("Invalid file type") }
+        } catch (e: Exception) { e.printStackTrace(); toast("Error importing settings") }
     }
 
     private fun passwordAlertDialog(callback: (CharArray?) -> Unit) {
         val password = CharArray(16).apply { fill('0') }
-
         val dialogView = DialogUserAgentBinding.inflate(layoutInflater).apply {
             userAgentTextBox.hint = "Password"
             subtitle.visibility = View.VISIBLE
@@ -640,34 +455,23 @@ class MainActivity : AppCompatActivity() {
             setTitle("Enter Password")
             setCustomView(dialogView.root)
             setPosButton(R.string.yes) {
-                val editText = dialogView.userAgentTextBox
-                if (editText.text?.isNotBlank() == true) {
-                    editText.text?.toString()?.trim()?.toCharArray(password)
+                if (dialogView.userAgentTextBox.text?.isNotBlank() == true) {
+                    dialogView.userAgentTextBox.text?.toString()?.trim()?.toCharArray(password)
                     callback(password)
-                } else {
-                    toast("Password cannot be empty")
-                }
+                } else { toast("Password cannot be empty") }
             }
-            setNegButton(R.string.cancel) {
-                password.fill('0')
-                callback(null)
-            }
+            setNegButton(R.string.cancel) { password.fill('0'); callback(null) }
             show()
         }
     }
 
-    private class ViewPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) :
-        FragmentStateAdapter(fragmentManager, lifecycle) {
-
+    private class ViewPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) : FragmentStateAdapter(fragmentManager, lifecycle) {
         override fun getItemCount(): Int = 3
-
-        override fun createFragment(position: Int): Fragment {
-            when (position) {
-                0 -> return AnimeFragment()
-                1 -> return if (Anilist.token != null) HomeFragment() else LoginFragment()
-                2 -> return MangaFragment()
-            }
-            return LoginFragment()
+        override fun createFragment(position: Int): Fragment = when (position) {
+            0 -> AnimeFragment()
+            1 -> if (Anilist.token != null) HomeFragment() else LoginFragment()
+            2 -> MangaFragment()
+            else -> LoginFragment()
         }
     }
 }
