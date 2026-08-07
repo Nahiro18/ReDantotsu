@@ -99,7 +99,7 @@ jobs:
             -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
             -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }};
         else
-          ./gradlew assembleGoogleAlpha;
+          ./gradlew assembleFdroidAlpha;
         fi
 
     - name: Upload a Build Artifact
@@ -109,7 +109,7 @@ jobs:
           name: ReDantotsu
           retention-days: 5
           compression-level: 9
-          path: "app/build/outputs/apk/google/alpha/app-google-alpha.apk"
+          path: "app/build/outputs/apk/fdroid/alpha/ReDantotsu-universal-alpha.apk"
 
     - name: Upload APK to Discord and Telegram
       if: ${{ github.repository == 'AsrOfficialDev/ReDantotsu' }}
