@@ -308,7 +308,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             
-            // CORRECCIÓN DE MÁRGENES APLICADA AQUÍ
             binding.includedNavbar.navbarContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = navBarHeight + 32.toPx
             }
@@ -399,7 +398,6 @@ class MainActivity : AppCompatActivity() {
         window.navigationBarColor = ContextCompat.getColor(this, android.R.color.transparent)
     }
 
-    // CORRECCIÓN DE MÁRGENES APLICADA AQUÍ
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         val marginDp = if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) 8 else 32
