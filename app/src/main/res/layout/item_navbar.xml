@@ -7,12 +7,14 @@
     android:layout_gravity="bottom|center_horizontal"
     android:clipChildren="false"
     android:clipToPadding="false"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
     android:visibility="gone">
 
     <FrameLayout
         android:id="@+id/blurView"
-        android:layout_width="260dp"
-        android:layout_height="60dp"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
         android:layout_gravity="bottom|center_horizontal"
         android:background="@drawable/pill_background"
         android:elevation="8dp">
@@ -21,10 +23,9 @@
             android:id="@+id/navbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
             android:background="@android:color/transparent"
             app:menu="@menu/bottom_navbar_menu"
-            app:labelVisibilityMode="unlabeled"
+            app:labelVisibilityMode="labeled"
             app:itemIconTint="@color/tab_layout_icon"
             app:itemTextColor="@color/tab_layout_icon"
             app:itemActiveIndicatorStyle="@null" />
