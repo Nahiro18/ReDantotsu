@@ -308,8 +308,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             
+            // Forzar renderizado de iconos
+            binding.includedNavbar.navbar.post {
+                binding.includedNavbar.navbar.requestLayout()
+            }
             binding.includedNavbar.navbarContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = navBarHeight + 32.toPx
+                bottomMargin = 0 // El padding ya está en el XML
             }
         }
 
