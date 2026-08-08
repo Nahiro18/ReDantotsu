@@ -1,70 +1,153 @@
 package eu.kanade.tachiyomi.extension.installer
 
+import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
-import androidx.core.content.FileProvider
+import android.content.IntentFilter
+import android.content.pm.PackageInstaller
+import android.os.Build
+import androidx.core.content.ContextCompat
+import androidx.core.content.IntentSanitizer
+import ani.dantotsu.R
 import ani.dantotsu.snackString
+import ani.dantotsu.toast
 import ani.dantotsu.util.Logger
 import eu.kanade.tachiyomi.extension.InstallStep
-import java.io.File
+import eu.kanade.tachiyomi.util.lang.use
+import eu.kanade.tachiyomi.util.system.getParcelableExtraCompat
+import eu.kanade.tachiyomi.util.system.getUriSize
 
-/**
- * Instalador de extensiones que NUNCA usa PackageInstaller (sesiones).
- * En MIUI/HyperOS (Xiaomi/Poco/Redmi) las sesiones de instalación de apps de
- * terceros están bloqueadas y lanzan "Index 0 requested, with a size of 0".
- * Por eso aquí simplemente abrimos el APK con el instalador del sistema,
- * igual que si el usuario tocara el archivo en el administrador de archivos.
- */
 class PackageInstallerInstaller(private val service: Service) : Installer(service) {
 
-    // Siempre listo
+    private val packageInstaller = service.packageManager.packageInstaller
+
+    private val packageActionReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            when (intent.getIntExtra(
+                PackageInstaller.EXTRA_STATUS,
+                PackageInstaller.STATUS_FAILURE
+            )) {
+                PackageInstaller.STATUS_PENDING_USER_ACTION -> {
+                    val userAction =
+                        intent.getParcelableExtraCompat<Intent>(Intent.EXTRA_INTENT)?.run {
+                            IntentSanitizer.Builder()
+                                .allowAction(this.action!!)
+                                .allowExtra(PackageInstaller.EXTRA_SESSION_ID) { id -> id == activeSession?.second }
+                                .allowAnyComponent()
+                                .allowPackage {
+                                    // There is no way to check the actual installer name so allow all.
+                                    true
+                                }
+                                .build()
+                                .sanitizeByFiltering(this)
+                        }
+                    if (userAction == null) {
+                        Logger.log("Fatal error for $intent")
+                        continueQueue(InstallStep.Error)
+                        return
+                    }
+                    userAction.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    service.startActivity(userAction)
+                }
+
+                PackageInstaller.STATUS_FAILURE_ABORTED -> {
+                    continueQueue(InstallStep.Idle)
+                }
+
+                PackageInstaller.STATUS_SUCCESS -> continueQueue(InstallStep.Installed)
+                PackageInstaller.STATUS_FAILURE_CONFLICT -> {
+                    Logger.log("Failed to install extension due to conflict")
+                    toast(context.getString(R.string.failed_ext_install_conflict))
+                    continueQueue(InstallStep.Error)
+                }
+                else -> {
+                    val status = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, -1)
+                    Logger.log("Fatal error for $intent")
+                    Logger.log("Status: $status")
+                    toast("Ext install status: $status")
+                    continueQueue(InstallStep.Error)
+                }
+            }
+        }
+    }
+
+    private var activeSession: Pair<Entry, Int>? = null
+
+    // Always ready
     override var ready = true
 
     override fun processEntry(entry: Entry) {
         super.processEntry(entry)
-        if (openSystemInstaller(entry)) {
-            // El estado real de "instalada" se actualiza solo mediante el
-            // broadcast ACTION_PACKAGE_ADDED cuando el usuario acepta en el sistema.
-            continueQueue(InstallStep.Idle)
-        } else {
-            snackString("No se pudo abrir el instalador del sistema")
+        activeSession = null
+        try {
+            val installParams =
+                PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
+            // NOTA: NO usamos setRequireUserAction(USER_ACTION_NOT_REQUIRED).
+            // En MIUI/HyperOS esa línea provoca el error interno
+            // "Index 0 requested, with a size of 0" y la pantalla de
+            // instalación nunca aparece. Sin ella, el sistema siempre
+            // muestra su confirmación normal (como en la app oficial).
+            activeSession = entry to packageInstaller.createSession(installParams)
+            val fileSize = service.getUriSize(entry.uri) ?: throw IllegalStateException()
+            installParams.setSize(fileSize)
+
+            val inputStream =
+                service.contentResolver.openInputStream(entry.uri) ?: throw IllegalStateException()
+            val session = packageInstaller.openSession(activeSession!!.second)
+            val outputStream = session.openWrite(entry.downloadId.toString(), 0, fileSize)
+            session.use {
+                arrayOf(inputStream, outputStream).use {
+                    inputStream.copyTo(outputStream)
+                    session.fsync(outputStream)
+                }
+
+                val intentSender = PendingIntent.getBroadcast(
+                    service,
+                    activeSession!!.second,
+                    Intent(INSTALL_ACTION).setPackage(service.packageName),
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT
+                    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        PendingIntent.FLAG_MUTABLE
+                    } else 0
+                ).intentSender
+                session.commit(intentSender)
+            }
+        } catch (e: Exception) {
+            Logger.log("Failed to install extension ${entry.downloadId} ${entry.uri}\n$e")
+            snackString("Failed to install extension ${entry.downloadId} ${entry.uri}")
+            activeSession?.let { (_, sessionId) ->
+                packageInstaller.abandonSession(sessionId)
+            }
             continueQueue(InstallStep.Error)
         }
     }
 
-    /**
-     * Abre el APK descargado con el instalador de paquetes del sistema.
-     */
-    private fun openSystemInstaller(entry: Entry): Boolean {
-        return try {
-            val uri = if (entry.uri.scheme == "file") {
-                val file = File(entry.uri.path ?: return false)
-                // Probamos los dos authorities de FileProvider más comunes
-                listOf("${service.packageName}.provider", "${service.packageName}.fileprovider")
-                    .firstNotNullOfOrNull { authority ->
-                        try {
-                            FileProvider.getUriForFile(service, authority, file)
-                        } catch (e: Exception) {
-                            null
-                        }
-                    } ?: return false
-            } else {
-                entry.uri
+    override fun cancelEntry(entry: Entry): Boolean {
+        activeSession?.let { (activeEntry, sessionId) ->
+            if (activeEntry == entry) {
+                packageInstaller.abandonSession(sessionId)
+                return false
             }
-
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                setDataAndType(uri, "application/vnd.android.package-archive")
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            service.startActivity(intent)
-            Logger.log("System installer opened for ${entry.downloadId}")
-            true
-        } catch (e: Exception) {
-            Logger.log("Failed to open system installer\n$e")
-            false
         }
+        return true
     }
 
-    override fun cancelEntry(entry: Entry): Boolean = true
+    override fun onDestroy() {
+        service.unregisterReceiver(packageActionReceiver)
+        super.onDestroy()
+    }
+
+    init {
+        ContextCompat.registerReceiver(
+            service,
+            packageActionReceiver,
+            IntentFilter(INSTALL_ACTION),
+            ContextCompat.RECEIVER_EXPORTED,
+        )
+    }
 }
+
+private const val INSTALL_ACTION = "PackageInstallerInstaller.INSTALL_ACTION"
