@@ -22,7 +22,6 @@
         app:labelVisibilityMode="selected"
         app:itemIconSize="24dp"
         app:itemIconTint="?attr/colorOnSurface"
-        app:itemTextColor="?attr/colorOnSurface"
-        app:itemActiveIndicatorStyle="@style/BottomNavIndicator" />
+        app:itemTextColor="?attr/colorOnSurface" />
 
 </FrameLayout>
