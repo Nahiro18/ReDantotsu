@@ -3,25 +3,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/navbar_container"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="64dp"
     android:layout_gravity="bottom|center_horizontal"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp"
-    android:paddingBottom="32dp"
     android:visibility="gone">
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/navbar"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:layout_gravity="center_horizontal"
+        android:layout_height="match_parent"
         android:background="@drawable/pill_background"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="32dp"
         app:menu="@menu/bottom_navbar_menu"
-        app:labelVisibilityMode="selected"
+        app:labelVisibilityMode="labeled"
         app:itemIconSize="24dp"
-        app:itemIconTint="?attr/colorOnSurface"
-        app:itemTextColor="?attr/colorOnSurface" />
+        app:itemIconTint="@color/tab_layout_icon"
+        app:itemTextColor="@color/tab_layout_icon" />
 
 </FrameLayout>
