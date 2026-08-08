@@ -9,6 +9,7 @@ import android.content.IntentFilter
 import android.content.pm.PackageInstaller
 import android.os.Build
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.content.IntentSanitizer
 import ani.dantotsu.R
 import ani.dantotsu.snackString
@@ -18,6 +19,7 @@ import eu.kanade.tachiyomi.extension.InstallStep
 import eu.kanade.tachiyomi.util.lang.use
 import eu.kanade.tachiyomi.util.system.getParcelableExtraCompat
 import eu.kanade.tachiyomi.util.system.getUriSize
+import java.io.File
 
 class PackageInstallerInstaller(private val service: Service) : Installer(service) {
 
@@ -65,7 +67,13 @@ class PackageInstallerInstaller(private val service: Service) : Installer(servic
                 else -> {
                     Logger.log("Fatal error for $intent")
                     Logger.log("Status: ${intent.getIntExtra(PackageInstaller.EXTRA_STATUS, -1)}")
-                    continueQueue(InstallStep.Error)
+                    // Plan B para MIUI/HyperOS: abrir el APK con el instalador del sistema
+                    val entry = activeSession?.first
+                    if (entry != null && fallbackToSystemInstaller(entry)) {
+                        continueQueue(InstallStep.Idle)
+                    } else {
+                        continueQueue(InstallStep.Error)
+                    }
                 }
             }
         }
@@ -82,9 +90,10 @@ class PackageInstallerInstaller(private val service: Service) : Installer(servic
         try {
             val installParams =
                 PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                installParams.setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED)
-            }
+            // NOTA: NO se llama a setRequireUserAction(USER_ACTION_NOT_REQUIRED).
+            // En MIUI/HyperOS (Xiaomi/Poco/Redmi) esa línea rompe la instalación con el
+            // error "Index 0 requested, with a size of 0". Sin ella, el sistema muestra
+            // su pantalla normal de confirmación en TODOS los dispositivos.
             activeSession = entry to packageInstaller.createSession(installParams)
             val fileSize = service.getUriSize(entry.uri) ?: throw IllegalStateException()
             installParams.setSize(fileSize)
@@ -113,11 +122,43 @@ class PackageInstallerInstaller(private val service: Service) : Installer(servic
             }
         } catch (e: Exception) {
             Logger.log("Failed to install extension ${entry.downloadId} ${entry.uri}\n$e")
-            snackString("Failed to install extension ${entry.downloadId} ${entry.uri}")
             activeSession?.let { (_, sessionId) ->
                 packageInstaller.abandonSession(sessionId)
             }
-            continueQueue(InstallStep.Error)
+            // Plan B para MIUI/HyperOS: abrir el APK con el instalador del sistema
+            if (fallbackToSystemInstaller(entry)) {
+                continueQueue(InstallStep.Idle)
+            } else {
+                snackString("Failed to install extension ${entry.downloadId} ${entry.uri}")
+                continueQueue(InstallStep.Error)
+            }
+        }
+    }
+
+    /**
+     * Abre el APK con el instalador de paquetes del sistema (igual que si
+     * tocaras el archivo descargado). Sirve cuando MIUI/HyperOS bloquea la
+     * instalación por sesión silenciosa.
+     */
+    private fun fallbackToSystemInstaller(entry: Entry): Boolean {
+        return try {
+            val uri = if (entry.uri.scheme == "file") {
+                val file = File(entry.uri.path ?: return false)
+                FileProvider.getUriForFile(service, "${service.packageName}.provider", file)
+            } else {
+                entry.uri
+            }
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, "application/vnd.android.package-archive")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            service.startActivity(intent)
+            snackString("MIUI bloqueó la instalación automática; continúa en el instalador del sistema")
+            true
+        } catch (e: Exception) {
+            Logger.log("Fallback install failed\n$e")
+            false
         }
     }
 
