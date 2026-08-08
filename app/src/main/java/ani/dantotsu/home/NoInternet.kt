@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,10 +23,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.view.doOnAttach
 import androidx.core.view.updateLayoutParams
-import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
+import androidx.viewpager2.adapter.FragmentStateAdapter
 import ani.dantotsu.R
 import ani.dantotsu.ZoomOutPageTransformer
 import ani.dantotsu.databinding.ActivityNoInternetBinding
@@ -37,11 +38,14 @@ import ani.dantotsu.snackString
 import ani.dantotsu.themes.ThemeManager
 import ani.dantotsu.widgets.LiquidBottomTab
 import ani.dantotsu.widgets.LiquidBottomTabs
+import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import kotlinx.coroutines.launch
 
 class NoInternet : AppCompatActivity() {
     private lateinit var binding: ActivityNoInternetBinding
+    private var selectedOption = 1
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -102,9 +106,9 @@ class NoInternet : AppCompatActivity() {
                             .layerBackdrop(backdrop)
                     ) { page ->
                         when (page) {
-                            0 -> OfflineAnimePageComposable(supportFragmentManager)
-                            1 -> OfflineHomePageComposable(supportFragmentManager)
-                            2 -> OfflineMangaPageComposable(supportFragmentManager)
+                            0 -> AnimeFragment()
+                            1 -> HomeFragment()
+                            2 -> MangaFragment()
                         }
                     }
                     
@@ -189,10 +193,10 @@ class NoInternet : AppCompatActivity() {
     private class ViewPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) : FragmentStateAdapter(fragmentManager, lifecycle) {
         override fun getItemCount(): Int = 3
         override fun createFragment(position: Int): Fragment = when (position) {
-            0 -> OfflineAnimeFragment()
-            1 -> OfflineHomeFragment()
-            2 -> OfflineMangaFragment()
-            else -> OfflineHomeFragment()
+            0 -> AnimeFragment()
+            1 -> HomeFragment()
+            2 -> MangaFragment()
+            else -> HomeFragment()
         }
     }
 }
