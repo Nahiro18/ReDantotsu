@@ -9,26 +9,20 @@
     android:clipToPadding="false"
     android:paddingStart="16dp"
     android:paddingEnd="16dp"
+    android:paddingBottom="32dp"
     android:visibility="gone">
 
-    <FrameLayout
-        android:id="@+id/blurView"
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/navbar"
         android:layout_width="match_parent"
         android:layout_height="64dp"
-        android:layout_gravity="bottom|center_horizontal"
+        android:layout_gravity="center_horizontal"
         android:background="@drawable/pill_background"
-        android:elevation="8dp">
+        app:menu="@menu/bottom_navbar_menu"
+        app:labelVisibilityMode="selected"
+        app:itemIconSize="24dp"
+        app:itemIconTint="?attr/colorOnSurface"
+        app:itemTextColor="?attr/colorOnSurface"
+        app:itemActiveIndicatorStyle="@style/BottomNavIndicator" />
 
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/navbar"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@android:color/transparent"
-            app:menu="@menu/bottom_navbar_menu"
-            app:labelVisibilityMode="labeled"
-            app:itemIconTint="@color/tab_layout_icon"
-            app:itemTextColor="@color/tab_layout_icon"
-            app:itemActiveIndicatorStyle="@null" />
-
-    </FrameLayout>
 </FrameLayout>
