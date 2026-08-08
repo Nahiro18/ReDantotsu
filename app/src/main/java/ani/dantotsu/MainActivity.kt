@@ -14,6 +14,7 @@ import android.provider.Settings
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnticipateInterpolator
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.activity.viewModels
@@ -285,35 +286,28 @@ class MainActivity : AppCompatActivity() {
                 binding.composeMainContent.visibility = View.GONE
                 
                 val mainViewPager = binding.viewpager
-                val navbar = binding.includedNavbar.navbar
-                
                 mainViewPager.isUserInputEnabled = false
                 mainViewPager.adapter = ViewPagerAdapter(supportFragmentManager, lifecycle)
                 mainViewPager.setPageTransformer(ZoomOutPageTransformer())
 
-                navbar.setOnItemSelectedListener { item ->
-                    when (item.itemId) {
-                        R.id.anime -> { selectedOption = 0; mainViewPager.setCurrentItem(0, false); true }
-                        R.id.home -> { selectedOption = 1; mainViewPager.setCurrentItem(1, false); true }
-                        R.id.manga -> { selectedOption = 2; mainViewPager.setCurrentItem(2, false); true }
-                        else -> false
+                val navButtons = listOf(
+                    binding.includedNavbar.navAnime,
+                    binding.includedNavbar.navHome,
+                    binding.includedNavbar.navManga
+                )
+
+                fun selectTab(index: Int) {
+                    selectedOption = index
+                    mainViewPager.setCurrentItem(index, false)
+                    navButtons.forEachIndexed { i, btn ->
+                        btn.alpha = if (i == index) 1.0f else 0.5f
                     }
                 }
 
-                if (mainViewPager.currentItem != selectedOption) {
-                    mainViewPager.post {
-                        mainViewPager.setCurrentItem(selectedOption, false)
-                        navbar.selectedItemId = when(selectedOption) { 0 -> R.id.anime; 1 -> R.id.home; 2 -> R.id.manga; else -> R.id.home }
-                    }
+                navButtons.forEachIndexed { i, btn ->
+                    btn.setOnClickListener { selectTab(i) }
                 }
-            }
-            
-            // Forzar renderizado de iconos
-            binding.includedNavbar.navbar.post {
-                binding.includedNavbar.navbar.requestLayout()
-            }
-            binding.includedNavbar.navbarContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = 0 // El padding ya está en el XML
+                selectTab(selectedOption)
             }
         }
 
@@ -400,13 +394,6 @@ class MainActivity : AppCompatActivity() {
     override fun onRestart() {
         super.onRestart()
         window.navigationBarColor = ContextCompat.getColor(this, android.R.color.transparent)
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        val marginDp = if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) 8 else 32
-        val params: ViewGroup.MarginLayoutParams = binding.includedNavbar.navbarContainer.layoutParams as ViewGroup.MarginLayoutParams
-        params.updateMargins(bottom = navBarHeight + marginDp.toPx)
     }
 
     private fun handleViewIntent(intent: Intent) {
