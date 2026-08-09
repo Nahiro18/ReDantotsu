@@ -116,6 +116,10 @@ class SettingsThemeActivity : AppCompatActivity(), SimpleDialog.OnDialogResultLi
                 }
             }
 
+            // FIX: Solo Material You necesita Android 12+ (S).
+            // Custom theme, unique theme y color picker funcionan en cualquier Android 6+.
+            val isAndroid12OrHigher = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+
             settingsRecyclerView.adapter = SettingsAdapter(
                 arrayListOf(
                     Settings(
@@ -140,7 +144,7 @@ class SettingsThemeActivity : AppCompatActivity(), SimpleDialog.OnDialogResultLi
                             if (isChecked) PrefManager.setVal(PrefName.UseCustomTheme, false)
                             reload()
                         },
-                        isVisible = Build.VERSION.SDK_INT > Build.VERSION_CODES.R
+                        isVisible = isAndroid12OrHigher  // Solo Material You necesita Android 12+
                     ),
                     Settings(
                         type = 2,
@@ -151,7 +155,7 @@ class SettingsThemeActivity : AppCompatActivity(), SimpleDialog.OnDialogResultLi
                         switch = { isChecked, _ ->
                             PrefManager.setVal(PrefName.UseSourceTheme, isChecked)
                         },
-                        isVisible = Build.VERSION.SDK_INT > Build.VERSION_CODES.R
+                        isVisible = true  // Funciona en cualquier Android
                     ),
                     Settings(
                         type = 2,
@@ -164,7 +168,7 @@ class SettingsThemeActivity : AppCompatActivity(), SimpleDialog.OnDialogResultLi
                             if (isChecked) PrefManager.setVal(PrefName.UseMaterialYou, false)
                             reload()
                         },
-                        isVisible = Build.VERSION.SDK_INT > Build.VERSION_CODES.R
+                        isVisible = true  // Funciona en cualquier Android
                     ),
                     Settings(
                         type = 1,
@@ -189,7 +193,7 @@ class SettingsThemeActivity : AppCompatActivity(), SimpleDialog.OnDialogResultLi
                                 .choiceMode(SimpleColorDialog.SINGLE_CHOICE).neg()
                                 .show(context, tag)
                         },
-                        isVisible = Build.VERSION.SDK_INT > Build.VERSION_CODES.R
+                        isVisible = true  // Funciona en cualquier Android
                     )
                 )
             )
