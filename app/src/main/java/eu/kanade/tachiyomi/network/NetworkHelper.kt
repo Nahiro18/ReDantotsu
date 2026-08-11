@@ -72,7 +72,7 @@ private fun setupSocks5Proxy() {
             .cache(
                 Cache(
                     directory = File(context.externalCacheDir ?: context.cacheDir, "network_cache"),
-                    maxSize = 5L * 1024 * 1024, // 5 MiB
+                    maxSize = 50L * 1024 * 1024, // 50 MiB
                 ),
             )
             .addInterceptor(UncaughtExceptionInterceptor())
