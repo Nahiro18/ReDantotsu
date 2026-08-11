@@ -21,17 +21,15 @@ class AlarmManagerScheduler(private val context: Context) : TaskScheduler {
         }
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-        val intent = when {
-            taskType == TaskType.COMMENT_NOTIFICATION && PrefManager.getVal<Int>(PrefName.CommentsEnabled) == 1 ->
+        val intent = when (taskType) {
+            TaskType.COMMENT_NOTIFICATION ->
                 Intent(context, CommentNotificationReceiver::class.java)
 
-            taskType == TaskType.ANILIST_NOTIFICATION ->
+            TaskType.ANILIST_NOTIFICATION ->
                 Intent(context, AnilistNotificationReceiver::class.java)
 
-            taskType == TaskType.SUBSCRIPTION_NOTIFICATION ->
+            TaskType.SUBSCRIPTION_NOTIFICATION ->
                 Intent(context, SubscriptionNotificationReceiver::class.java)
-
-            else -> return
         }
 
         val pendingIntent = PendingIntent.getBroadcast(
@@ -62,17 +60,15 @@ class AlarmManagerScheduler(private val context: Context) : TaskScheduler {
     override fun cancelTask(taskType: TaskType) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-        val intent = when {
-            taskType == TaskType.COMMENT_NOTIFICATION && PrefManager.getVal<Int>(PrefName.CommentsEnabled) == 1 ->
+        val intent = when (taskType) {
+            TaskType.COMMENT_NOTIFICATION ->
                 Intent(context, CommentNotificationReceiver::class.java)
 
-            taskType == TaskType.ANILIST_NOTIFICATION ->
+            TaskType.ANILIST_NOTIFICATION ->
                 Intent(context, AnilistNotificationReceiver::class.java)
 
-            taskType == TaskType.SUBSCRIPTION_NOTIFICATION ->
+            TaskType.SUBSCRIPTION_NOTIFICATION ->
                 Intent(context, SubscriptionNotificationReceiver::class.java)
-
-            else -> return
         }
 
         val pendingIntent = PendingIntent.getBroadcast(
