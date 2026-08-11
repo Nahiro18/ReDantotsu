@@ -210,17 +210,11 @@ fun initActivity(a: Activity) {
         )
     }
     if (immersiveMode) {
-        if (navBarHeight == 0) {
-            ViewCompat.getRootWindowInsets(window.decorView.findViewById(android.R.id.content))
-                ?.apply {
-                    navBarHeight = this.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) navBarHeight += 48.toPx
-                }
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            hide(WindowInsetsCompat.Type.systemBars())
         }
-        WindowInsetsControllerCompat(
-            window,
-            window.decorView
-        ).hide(WindowInsetsCompat.Type.statusBars())
+        navBarHeight = 0
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && statusBarHeight == 0
             && a.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
         ) {
@@ -230,17 +224,17 @@ fun initActivity(a: Activity) {
                 }
             }
         }
-    } else
-        if (statusBarHeight == 0) {
-            val windowInsets =
-                ViewCompat.getRootWindowInsets(window.decorView.findViewById(android.R.id.content))
-            if (windowInsets != null) {
-                statusBarHeight = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars()).top
-                navBarHeight =
-                    windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) navBarHeight += 48.toPx
-            }
+    } else {
+        WindowInsetsControllerCompat(window, window.decorView).show(WindowInsetsCompat.Type.systemBars())
+        val windowInsets =
+            ViewCompat.getRootWindowInsets(window.decorView.findViewById(android.R.id.content))
+        if (windowInsets != null) {
+            statusBarHeight = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            navBarHeight =
+                windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) navBarHeight += 48.toPx
         }
+    }
     if (a !is MainActivity) a.setNavigationTheme()
 }
 

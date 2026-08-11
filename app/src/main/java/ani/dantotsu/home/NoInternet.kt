@@ -30,8 +30,11 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import ani.dantotsu.R
 import ani.dantotsu.ZoomOutPageTransformer
 import ani.dantotsu.databinding.ActivityNoInternetBinding
+import ani.dantotsu.download.anime.OfflineAnimeFragment
+import ani.dantotsu.download.manga.OfflineMangaFragment
 import ani.dantotsu.initActivity
 import ani.dantotsu.navBarHeight
+import ani.dantotsu.offline.OfflineFragment
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
 import ani.dantotsu.snackString
@@ -70,10 +73,6 @@ class NoInternet : AppCompatActivity() {
         binding.root.doOnAttach {
             initActivity(this)
             selectedOption = PrefManager.getVal(PrefName.DefaultStartUpTab)
-
-            binding.includedNavbar.navbarContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = navBarHeight
-            }
         }
 
         val isLiquidGlassTheme = PrefManager.getVal<String>(PrefName.Theme) == "LIQUID_GLASS"
@@ -106,9 +105,9 @@ class NoInternet : AppCompatActivity() {
                             .layerBackdrop(backdrop)
                     ) { page ->
                         when (page) {
-                            0 -> AnimeFragment()
-                            1 -> HomeFragment()
-                            2 -> MangaFragment()
+                            0 -> OfflineAnimePageComposable(supportFragmentManager)
+                            1 -> OfflineHomePageComposable(supportFragmentManager)
+                            2 -> OfflineMangaPageComposable(supportFragmentManager)
                         }
                     }
                     
@@ -193,10 +192,9 @@ class NoInternet : AppCompatActivity() {
     private class ViewPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) : FragmentStateAdapter(fragmentManager, lifecycle) {
         override fun getItemCount(): Int = 3
         override fun createFragment(position: Int): Fragment = when (position) {
-            0 -> AnimeFragment()
-            1 -> HomeFragment()
-            2 -> MangaFragment()
-            else -> HomeFragment()
+            0 -> OfflineAnimeFragment()
+            2 -> OfflineMangaFragment()
+            else -> OfflineFragment()
         }
     }
 }

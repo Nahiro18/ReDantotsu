@@ -325,14 +325,12 @@ class LiquidGlassBottomBar @JvmOverloads constructor(
         
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            contentAlignment = Alignment.BottomCenter
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
+                    .fillMaxSize()
                     .shadow(8.dp, shape)
                     .clip(shape)
                     .background(bgColor)
