@@ -22,6 +22,8 @@
 
 > **✨ The Ultimate Anime & Manga Experience for Android**
 
+> 🔔 **¡Únete a nuestro servidor de Discord del fork!** Únete para recibir noticias, soporte y novedades.
+
 <p align="center">
   <a href="https://discord.gg/GGdQumttZ">
     <img src="https://img.shields.io/badge/Join%20the%20ReDantotsu%20fork's%20Discord-7289da?style=for-the-badge&logo=discord&logoColor=white" alt="Join the ReDantotsu fork's Discord">
