@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en-rUS">
 
-    <string name="repo" translatable="false">AsrOfficialDev/ReDantotsu</string>
+    <string name="repo" translatable="false">Nahiro18/ReDantotsu</string>
     <string name="preference_file_key" translatable="false">dantotsuprefs</string>
 
     <string name="app_name" translatable="false">ReDantotsu</string>
@@ -10,9 +10,9 @@
     <string name="logout">Logout</string>
 
     <string name="dantotsu" translatable="false">https://dantotsu.app/</string>
-    <string name="discord" translatable="false">https://discord.gg/fYEJmDsDz9</string>
-    <string name="github" translatable="false">https://github.com/AsrOfficialDev/ReDantotsu</string>
-    <string name="telegram" translatable="false" tools:ignore="Typos">https://t.me/redantotsu</string>
+    <string name="discord" translatable="false">https://discord.gg/GGdQumttZ</string>
+    <string name="github" translatable="false">https://github.com/Nahiro18/ReDantotsu</string>
+    <string name="telegram" translatable="false" tools:ignore="Typos">https://t.me/redantotsuu</string>
     <string name="coffee" translatable="false">https://patreon.com/AsrOfficialDev</string>
     <string name="support_me">Support me</string>
 
