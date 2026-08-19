@@ -22,7 +22,11 @@
 
 > **✨ The Ultimate Anime & Manga Experience for Android**
 
-> 🔔 **Join the ReDantotsu fork's Discord server:** [discord.gg/GGdQumttZ](https://discord.gg/GGdQumttZ)
+<p align="center">
+  <a href="https://discord.gg/GGdQumttZ">
+    <img src="https://img.shields.io/badge/Join%20the%20ReDantotsu%20fork's%20Discord-7289da?style=for-the-badge&logo=discord&logoColor=white" alt="Join the ReDantotsu fork's Discord">
+  </a>
+</p>
 
 ReDantotsu is a premium fan remake of the beloved Dantotsu application. I've taken the robust foundation of the original app and completely reimagined it, introducing a modern UI, expanding core functionality, and implementing crucial stability fixes to deliver the definitive anime and manga tracking experience.
 
