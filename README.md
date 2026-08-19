@@ -22,7 +22,7 @@
 
 > **✨ The Ultimate Anime & Manga Experience for Android**
 
-> 🔔 **¡Únete a nuestro servidor de Discord del fork!** Únete para recibir noticias, soporte y novedades.
+> 🔔 **Join the ReDantotsu fork's Discord server!** Get updates, support, and the latest news here.
 
 <p align="center">
   <a href="https://discord.gg/GGdQumttZ">
