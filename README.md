@@ -1,23 +1,23 @@
 # ReDantotsu
 
 <p align="center">
-  <a href="https://github.com/AsrOfficialDev/ReDantotsu/releases/latest">
-    <img src="https://img.shields.io/github/v/release/AsrOfficialDev/ReDantotsu?style=for-the-badge&logo=github&color=00bfff&label=Current%20Release" alt="Current Release">
+  <a href="https://github.com/Nahiro18/ReDantotsu/releases/latest">
+    <img src="https://img.shields.io/github/v/release/Nahiro18/ReDantotsu?style=for-the-badge&logo=github&color=00bfff&label=Current%20Release" alt="Current Release">
   </a>
-  <a href="https://github.com/AsrOfficialDev/ReDantotsu/releases">
-    <img src="https://img.shields.io/github/downloads/AsrOfficialDev/ReDantotsu/total?style=for-the-badge&logo=github&color=2ea44f&label=Total%20Downloads" alt="Total Downloads">
+  <a href="https://github.com/Nahiro18/ReDantotsu/releases">
+    <img src="https://img.shields.io/github/downloads/Nahiro18/ReDantotsu/total?style=for-the-badge&logo=github&color=2ea44f&label=Total%20Downloads" alt="Total Downloads">
   </a>
-  <a href="https://github.com/AsrOfficialDev/ReDantotsu/stargazers">
-    <img src="https://img.shields.io/github/stars/AsrOfficialDev/ReDantotsu?style=for-the-badge&logo=github&color=yellow&label=Stars" alt="Stars">
+  <a href="https://github.com/Nahiro18/ReDantotsu/stargazers">
+    <img src="https://img.shields.io/github/stars/Nahiro18/ReDantotsu?style=for-the-badge&logo=github&color=yellow&label=Stars" alt="Stars">
   </a>
-  <a href="https://discord.gg/fYEJmDsDz9">
+  <a href="https://discord.gg/GGdQumttZ">
     <img src="https://img.shields.io/badge/Discord-Join%20Us-7289da?style=for-the-badge&logo=discord&logoColor=white" alt="Discord">
   </a>
   <a href="./LICENSE.md">
     <img src="https://img.shields.io/badge/License-UPL-blue?style=for-the-badge&logo=open-source-initiative&logoColor=white" alt="License: UPL">
   </a>
   <img src="https://img.shields.io/badge/Android-14%2B-green?style=for-the-badge&logo=android" alt="Android 14+">
-  <img src="https://komarev.com/ghpvc/?username=AsrOfficialDev-ReDantotsu&style=for-the-badge&label=Visits" alt="Visits">
+  <img src="https://komarev.com/ghpvc/?username=Nahiro18-ReDantotsu&style=for-the-badge&label=Visits" alt="Visits">
 </p>
 
 > **✨ The Ultimate Anime & Manga Experience for Android**
@@ -62,7 +62,7 @@ We've extensively upgraded the app far beyond a simple visual reskin. Here is wh
 
 ## 📥 Installation
 
-1. Download the latest APK from the [Releases](https://github.com/AsrOfficialDev/ReDantotsu/releases) page.
+1. Download the latest APK from the [Releases](https://github.com/Nahiro18/ReDantotsu/releases) page.
 2. Enable "Install from unknown sources" if prompted by your device.
 3. Install and enjoy!
 
@@ -70,7 +70,7 @@ We've extensively upgraded the app far beyond a simple visual reskin. Here is wh
 
 ```bash
 # Clone the repository
-git clone https://github.com/AsrOfficialDev/ReDantotsu.git
+git clone https://github.com/Nahiro18/ReDantotsu.git
 cd ReDantotsu
 
 # Build debug APK
