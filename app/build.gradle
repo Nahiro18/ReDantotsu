@@ -105,7 +105,7 @@ android {
         variant.outputs.all { output ->
             def abi = output.getFilter(com.android.build.OutputFile.ABI)
             if (abi == null) abi = "universal"
-            outputFileName = "ReDantotsu-${abi}-${variant.buildType.name}.apk"
+            outputFileName = "Redantotsu-v${variant.versionName}-${abi}.apk"
         }
     }
 }
