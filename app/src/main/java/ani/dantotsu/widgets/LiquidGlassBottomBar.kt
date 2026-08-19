@@ -323,33 +323,29 @@ class LiquidGlassBottomBar @JvmOverloads constructor(
         val inactiveColor = Color.Gray
         val shape = RoundedCornerShape(40.dp) // Pill shape
         
-        Box(
+        Row(
             modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
+                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .fillMaxWidth()
+                .height(60.dp)
+                .shadow(8.dp, shape)
+                .clip(shape)
+                .background(bgColor)
+                .border(1.dp, borderColor, shape),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .shadow(8.dp, shape)
-                    .clip(shape)
-                    .background(bgColor)
-                    .border(1.dp, borderColor, shape),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                tabs.forEachIndexed { index, tab ->
-                    IconButton(
-                        onClick = { selectTabAtInternal(index) },
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = tab.iconRes),
-                            contentDescription = tab.title,
-                            tint = if (index == selectedIndex) activeColor else inactiveColor,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+            tabs.forEachIndexed { index, tab ->
+                IconButton(
+                    onClick = { selectTabAtInternal(index) },
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = tab.iconRes),
+                        contentDescription = tab.title,
+                        tint = if (index == selectedIndex) activeColor else inactiveColor,
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
             }
         }
