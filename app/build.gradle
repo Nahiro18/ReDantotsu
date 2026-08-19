@@ -14,13 +14,25 @@ def gitCommitHash = providers.exec {
 android {
     compileSdk 35
 
+    signingConfigs {
+        release {
+            def keystorePath = System.getenv("KEYSTORE_PATH")
+            if (keystorePath != null) {
+                storeFile file(keystorePath)
+                storePassword System.getenv("KEYSTORE_PASSWORD") ?: "android"
+                keyAlias System.getenv("KEY_ALIAS") ?: "androiddebugkey"
+                keyPassword System.getenv("KEY_PASSWORD") ?: "android"
+            }
+        }
+    }
+
     defaultConfig {
         applicationId "app.redantotsu.asr"
         minSdk 23
         targetSdk 35
-        versionName "1.0.7"
-        versionCode 100000007
-        signingConfig signingConfigs.debug
+        versionName "1.0.8"
+        versionCode 100000008
+        signingConfig System.getenv("KEYSTORE_PATH") != null ? signingConfigs.release : signingConfigs.debug
 
     }
 
