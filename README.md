@@ -103,9 +103,10 @@ cd ReDantotsu
 ### Original Project
 - **[Dantotsu](https://git.rebelonion.dev/rebelonion/Dantotsu)** by [rebelonion](https://github.com/rebelonion)
 - Built from the ashes of Saikou
+- Forked by Nahiro18 working on Ashraful main project
 
 ### ReDantotsu
-- **Fan Remake Developer:** Ashraful
+- **Fan Remake Developer:** Nahiro18(ashraful forked project)
 - **Liquid Glass Effect:** Based on iOS 26 design language
 - **Backdrop Library:** [backdrop](https://github.com/kyant0/backdrop) by kyant0
 
