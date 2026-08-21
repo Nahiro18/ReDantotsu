@@ -12,8 +12,9 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.NetworkHelper.Companion.defaultUserAgentProvider
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.encodeToString
@@ -85,12 +86,12 @@ object Mapper : ResponseParser {
     }
 }
 
-fun <A, B> Collection<A>.asyncMap(f: suspend (A) -> B): List<B> = runBlocking {
-    map { async { f(it) } }.map { it.await() }
+suspend fun <A, B> Collection<A>.asyncMap(f: suspend (A) -> B): List<B> = coroutineScope {
+    map { async { f(it) } }.awaitAll()
 }
 
-fun <A, B> Collection<A>.asyncMapNotNull(f: suspend (A) -> B?): List<B> = runBlocking {
-    map { async { f(it) } }.mapNotNull { it.await() }
+suspend fun <A, B> Collection<A>.asyncMapNotNull(f: suspend (A) -> B?): List<B> = coroutineScope {
+    map { async { f(it) } }.awaitAll().filterNotNull()
 }
 
 fun logError(e: Throwable, post: Boolean = true, snackbar: Boolean = true) {
