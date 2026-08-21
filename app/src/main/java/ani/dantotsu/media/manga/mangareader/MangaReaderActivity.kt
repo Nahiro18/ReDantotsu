@@ -1150,14 +1150,17 @@ class MangaReaderActivity : AppCompatActivity() {
     }
 
     private fun saveReaderSettings(fileName: String, data: Any?, context: Context? = null) {
-        tryWith {
-            val a = context ?: currContext()
-            if (a != null) {
-                val fos: FileOutputStream = a.openFileOutput(fileName, Context.MODE_PRIVATE)
-                val os = ObjectOutputStream(fos)
-                os.writeObject(data)
-                os.close()
-                fos.close()
+        // Offload file I/O from Main to avoid ANR
+        lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            tryWith {
+                val a = context ?: currContext()
+                if (a != null) {
+                    val fos: FileOutputStream = a.openFileOutput(fileName, Context.MODE_PRIVATE)
+                    val os = ObjectOutputStream(fos)
+                    os.writeObject(data)
+                    os.close()
+                    fos.close()
+                }
             }
         }
     }
