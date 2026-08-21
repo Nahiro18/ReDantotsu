@@ -104,7 +104,8 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
         initWithMedia(media)
     }
 
-    private fun initWithMedia(media: Media) {
+    private fun initWithMedia(initialMedia: Media) {
+        var media = initialMedia
         val contract = ActivityResultContracts.OpenDocumentTree()
         launcher = LauncherWrapper(this, contract)
 
