@@ -4,4 +4,5 @@
   <issue id="NewApi" severity="error" />
   <issue id="SetTextI18n" severity="error" />
   <issue id="HardcodedText" severity="error" />
+    <issue id="UnusedResources" severity="warning" />
 </lint>

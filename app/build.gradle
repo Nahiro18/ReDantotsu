@@ -86,7 +86,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = '17'
-        freeCompilerArgs = ["-Xcontext-receivers", "-Xmulti-platform"]
+        freeCompilerArgs = ["-Xcontext-parameters"]
     }
     namespace 'ani.dantotsu'
     
@@ -127,7 +127,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'com.google.code.gson:gson:2.11.0'
     implementation 'com.github.Blatzar:NiceHttp:0.4.4'
-    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3'
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3'
     implementation 'androidx.preference:preference-ktx:1.2.1'
     implementation 'androidx.webkit:webkit:1.12.1'
     implementation "com.anggrayudi:storage:1.5.5"
@@ -164,7 +164,7 @@ dependencies {
     implementation 'androidx.compose.material3:material3'
     implementation 'androidx.activity:activity-compose:1.9.3'
     debugImplementation 'androidx.compose.ui:ui-tooling'
-    implementation "io.coil-kt:coil-compose:2.6.0"
+    implementation "io.coil-kt:coil-compose:2.7.0"
 
 //  Android Liquid Glass (Backdrop)
     implementation 'io.github.kyant0:backdrop:1.0.0-rc02'
@@ -212,7 +212,7 @@ dependencies {
     implementation 'com.squareup.okio:okio:3.8.0'
     implementation 'com.squareup.okhttp3:okhttp-brotli:4.12.0'
     implementation 'org.jsoup:jsoup:1.17.2'
-    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json-okio:1.6.3'
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json-okio:1.7.3'
     implementation 'com.jakewharton.rxrelay:rxrelay:1.2.0'
     implementation 'com.github.tachiyomiorg:unifile:17bec43'
     implementation 'com.github.gpanther:java-nat-sort:natural-comparator-1.1'
