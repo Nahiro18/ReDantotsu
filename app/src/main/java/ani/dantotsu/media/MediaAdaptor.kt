@@ -37,6 +37,7 @@ import com.flaviofaria.kenburnsview.RandomTransitionGenerator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.Serializable
 
 
@@ -114,14 +115,16 @@ class MediaAdaptor(
                         b.itemCompactMalScoreBG.visibility = View.GONE
                         // Fetch MAL score asynchronously if we have a MAL ID
                         media.idMAL?.let { malId ->
-                            CoroutineScope(Dispatchers.Main).launch {
+                            CoroutineScope(Dispatchers.IO).launch {
                                 val score = JikanService.getAnimeScore(malId)
                                     ?: JikanService.getMangaScore(malId)
                                 if (score != null && score > 0) {
                                     media.malScore = score
-                                    if (holder.bindingAdapterPosition != RecyclerView.NO_POSITION && mediaList?.getOrNull(holder.bindingAdapterPosition)?.id == media.id) {
-                                        b.itemCompactMalScoreBG.visibility = View.VISIBLE
-                                        b.itemCompactMalScore.text = String.format("%.1f", score)
+                                    withContext(Dispatchers.Main) {
+                                        if (holder.bindingAdapterPosition != RecyclerView.NO_POSITION && mediaList?.getOrNull(holder.bindingAdapterPosition)?.id == media.id) {
+                                            b.itemCompactMalScoreBG.visibility = View.VISIBLE
+                                            b.itemCompactMalScore.text = String.format("%.1f", score)
+                                        }
                                     }
                                 }
                             }
