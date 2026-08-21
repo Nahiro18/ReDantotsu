@@ -18,12 +18,18 @@ class Contributors {
     )
 
     suspend fun getContributorSections(): DeveloperSections {
-        // ReDantotsu developers (only AsrOfficialDev)
+        // ReDantotsu developers (Nahiro18 - fork maintainer, based on AsrOfficialDev)
         val redantotsuDevs = arrayOf(
             Developer(
+                "Nahiro18",
+                "https://github.com/Nahiro18.png",
+                "ReDantotsu Fork Maintainer",
+                "https://github.com/Nahiro18"
+            ),
+            Developer(
                 "AsrOfficialDev",
-                "https://github.com/AsrOfficialDev.png", 
-                "ReDantotsu Developer",
+                "https://github.com/AsrOfficialDev.png",
+                "Original ReDantotsu Developer",
                 "https://github.com/AsrOfficialDev"
             )
         )
@@ -101,7 +107,7 @@ class Contributors {
                 }
             
             // Add GitHub contributors that aren't already in the list
-            val existingNames = dantotsuDevs.map { it.name.lowercase() }.toSet() + setOf("asrofficialdev")
+            val existingNames = dantotsuDevs.map { it.name.lowercase() }.toSet() + setOf("asrofficialdev", "nahiro18")
             
             res.forEach {
                 if (it.login.lowercase() in existingNames || it.login == "SunglassJerry") return@forEach
