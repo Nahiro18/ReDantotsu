@@ -29,9 +29,8 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.extension.anime.AnimeExtensionManager
 import eu.kanade.tachiyomi.extension.manga.MangaExtensionManager
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import logcat.AndroidLogcatLogger
@@ -62,8 +61,8 @@ class App : MultiDexApplication() {
     }
 
     val mFTActivityLifecycleCallbacks = FTActivityLifecycleCallbacks()
+    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate() {
         super.onCreate()
         PrefManager.init(this)
@@ -115,19 +114,19 @@ class App : MultiDexApplication() {
             }
         }
 
-        CoroutineScope(Dispatchers.IO).launch {
+        applicationScope.launch {
             animeExtensionManager = Injekt.get()
             animeExtensionManager.findAvailableExtensions()
             Logger.log("Anime Extensions: ${animeExtensionManager.installedExtensionsFlow.first()}")
             AnimeSources.init(animeExtensionManager.installedExtensionsFlow)
         }
-        CoroutineScope(Dispatchers.IO).launch {
+        applicationScope.launch {
             mangaExtensionManager = Injekt.get()
             mangaExtensionManager.findAvailableExtensions()
             Logger.log("Manga Extensions: ${mangaExtensionManager.installedExtensionsFlow.first()}")
             MangaSources.init(mangaExtensionManager.installedExtensionsFlow)
         }
-        CoroutineScope(Dispatchers.IO).launch {
+        applicationScope.launch {
             novelExtensionManager = Injekt.get()
             lnReaderPluginManager = Injekt.get()
             lnReaderJsExecutor = Injekt.get()
@@ -143,7 +142,7 @@ class App : MultiDexApplication() {
                 lnReaderJsExecutor
             )
         }
-        GlobalScope.launch {
+        applicationScope.launch {
             torrentAddonManager = Injekt.get()
             downloadAddonManager = Injekt.get()
             torrentAddonManager.init()
