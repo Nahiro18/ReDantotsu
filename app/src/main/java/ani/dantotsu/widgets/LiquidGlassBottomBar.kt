@@ -60,10 +60,9 @@ class LiquidGlassBottomBar @JvmOverloads constructor(
     private var selectedIndex by mutableIntStateOf(0)
     private var tabSelectListener: OnTabSelectListener? = null
     
-    // Cache theme check
-    private val isLiquidGlassTheme: Boolean by lazy {
-        PrefManager.getVal<String>(PrefName.Theme) == "LIQUID_GLASS"
-    }
+    // Theme check (not cached, reacts to theme changes)
+    private val isLiquidGlassTheme: Boolean
+        get() = PrefManager.getVal<String>(PrefName.Theme) == "LIQUID_GLASS"
 
     init {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
