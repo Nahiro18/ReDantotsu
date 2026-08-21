@@ -81,18 +81,30 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
         super.onCreate(savedInstanceState)
         var media: Media = intent.getSerialized("media") ?: mediaSingleton ?: emptyMedia()
         val id = intent.getIntExtra("mediaId", -1)
-        if (id != -1) {
-            runBlocking {
-                withContext(Dispatchers.IO) {
-                    media = Anilist.query.getMedia(id, false) ?: emptyMedia()
+        if (id != -1 && (media.name == "No media found" || media.id == 0)) {
+            // Load async to avoid ANR (was runBlocking on Main)
+            lifecycleScope.launch {
+                val loaded = withContext(Dispatchers.IO) {
+                    Anilist.query.getMedia(id, false) ?: emptyMedia()
                 }
+                if (loaded.name == "No media found") {
+                    snackString(loaded.name)
+                    onBackPressedDispatcher.onBackPressed()
+                    return@launch
+                }
+                initWithMedia(loaded)
             }
+            return
         }
         if (media.name == "No media found") {
             snackString(media.name)
             onBackPressedDispatcher.onBackPressed()
             return
         }
+        initWithMedia(media)
+    }
+
+    private fun initWithMedia(media: Media) {
         val contract = ActivityResultContracts.OpenDocumentTree()
         launcher = LauncherWrapper(this, contract)
 
@@ -328,7 +340,6 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
         }
     }
 
-    // CORRECCIÓN SEGURA APLICADA AQUÍ (Sin usar .toPx)
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         val marginDp = if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) 8 else 32
