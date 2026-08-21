@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.network
 
 import android.content.Context
 import android.os.Build
+import ani.dantotsu.BuildConfig
 import ani.dantotsu.Mapper
 import ani.dantotsu.settings.saving.PrefManager
 import ani.dantotsu.settings.saving.PrefName
@@ -86,7 +87,7 @@ private fun setupSocks5Proxy() {
             }
         }
 
-        if (PrefManager.getVal<Boolean>(PrefName.VerboseLogging)) {
+        if (BuildConfig.DEBUG && PrefManager.getVal<Boolean>(PrefName.VerboseLogging)) {
             val httpLoggingInterceptor = HttpLoggingInterceptor(ConsoleLogger()).apply {
                 level = HttpLoggingInterceptor.Level.BASIC
             }

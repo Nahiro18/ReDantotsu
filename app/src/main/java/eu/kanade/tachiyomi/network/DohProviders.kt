@@ -4,6 +4,8 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.dnsoverhttps.DnsOverHttps
 import java.net.InetAddress
+private fun ipv4(a: Int, b: Int, c: Int, d: Int): java.net.InetAddress =
+    java.net.InetAddress.getByAddress(byteArrayOf(a.toByte(), b.toByte(), c.toByte(), d.toByte()))
 
 /**
  * Based on https://github.com/square/okhttp/blob/ef5d0c83f7bbd3a0c0534e7ca23cbc4ee7550f3b/okhttp-dnsoverhttps/src/test/java/okhttp3/dnsoverhttps/DohProviders.java
@@ -27,11 +29,11 @@ fun OkHttpClient.Builder.dohCloudflare() = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://cloudflare-dns.com/dns-query".toHttpUrl())
         .bootstrapDnsHosts(
-            InetAddress.getByName("162.159.36.1"),
-            InetAddress.getByName("162.159.46.1"),
-            InetAddress.getByName("1.1.1.1"),
-            InetAddress.getByName("1.0.0.1"),
-            InetAddress.getByName("162.159.132.53"),
+            ipv4(162, 159, 36, 1),
+            ipv4(162, 159, 46, 1),
+            ipv4(1, 1, 1, 1),
+            ipv4(1, 0, 0, 1),
+            ipv4(162, 159, 132, 53),
             InetAddress.getByName("2606:4700:4700::1111"),
             InetAddress.getByName("2606:4700:4700::1001"),
             InetAddress.getByName("2606:4700:4700::0064"),
@@ -44,8 +46,8 @@ fun OkHttpClient.Builder.dohGoogle() = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://dns.google/dns-query".toHttpUrl())
         .bootstrapDnsHosts(
-            InetAddress.getByName("8.8.4.4"),
-            InetAddress.getByName("8.8.8.8"),
+            ipv4(8, 8, 4, 4),
+            ipv4(8, 8, 8, 8),
             InetAddress.getByName("2001:4860:4860::8888"),
             InetAddress.getByName("2001:4860:4860::8844"),
         )
@@ -58,8 +60,8 @@ fun OkHttpClient.Builder.dohAdGuard() = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://dns-unfiltered.adguard.com/dns-query".toHttpUrl())
         .bootstrapDnsHosts(
-            InetAddress.getByName("94.140.14.140"),
-            InetAddress.getByName("94.140.14.141"),
+            ipv4(94, 140, 14, 140),
+            ipv4(94, 140, 14, 141),
             InetAddress.getByName("2a10:50c0::1:ff"),
             InetAddress.getByName("2a10:50c0::2:ff"),
         )
@@ -70,8 +72,8 @@ fun OkHttpClient.Builder.dohQuad9() = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://dns.quad9.net/dns-query".toHttpUrl())
         .bootstrapDnsHosts(
-            InetAddress.getByName("9.9.9.9"),
-            InetAddress.getByName("149.112.112.112"),
+            ipv4(9, 9, 9, 9),
+            ipv4(149, 112, 112, 112),
             InetAddress.getByName("2620:fe::fe"),
             InetAddress.getByName("2620:fe::9"),
         )
@@ -82,8 +84,8 @@ fun OkHttpClient.Builder.dohAliDNS() = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://dns.alidns.com/dns-query".toHttpUrl())
         .bootstrapDnsHosts(
-            InetAddress.getByName("223.5.5.5"),
-            InetAddress.getByName("223.6.6.6"),
+            ipv4(223, 5, 5, 5),
+            ipv4(223, 6, 6, 6),
             InetAddress.getByName("2400:3200::1"),
             InetAddress.getByName("2400:3200:baba::1"),
         )
@@ -94,8 +96,8 @@ fun OkHttpClient.Builder.dohDNSPod() = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://doh.pub/dns-query".toHttpUrl())
         .bootstrapDnsHosts(
-            InetAddress.getByName("1.12.12.12"),
-            InetAddress.getByName("120.53.53.53"),
+            ipv4(1, 12, 12, 12),
+            ipv4(120, 53, 53, 53),
         )
         .build(),
 )
@@ -104,13 +106,13 @@ fun OkHttpClient.Builder.doh360() = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://doh.360.cn/dns-query".toHttpUrl())
         .bootstrapDnsHosts(
-            InetAddress.getByName("101.226.4.6"),
-            InetAddress.getByName("218.30.118.6"),
-            InetAddress.getByName("123.125.81.6"),
-            InetAddress.getByName("140.207.198.6"),
-            InetAddress.getByName("180.163.249.75"),
-            InetAddress.getByName("101.199.113.208"),
-            InetAddress.getByName("36.99.170.86"),
+            ipv4(101, 226, 4, 6),
+            ipv4(218, 30, 118, 6),
+            ipv4(123, 125, 81, 6),
+            ipv4(140, 207, 198, 6),
+            ipv4(180, 163, 249, 75),
+            ipv4(101, 199, 113, 208),
+            ipv4(36, 99, 170, 86),
         )
         .build(),
 )
@@ -119,7 +121,7 @@ fun OkHttpClient.Builder.dohQuad101() = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://dns.twnic.tw/dns-query".toHttpUrl())
         .bootstrapDnsHosts(
-            InetAddress.getByName("101.101.101.101"),
+            ipv4(101, 101, 101, 101),
             InetAddress.getByName("2001:de4::101"),
             InetAddress.getByName("2001:de4::102"),
         )
@@ -135,8 +137,8 @@ fun OkHttpClient.Builder.dohMullvad() = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://doh.mullvad.net/dns-query".toHttpUrl())
         .bootstrapDnsHosts(
-            InetAddress.getByName("194.242.2.2"),
-            InetAddress.getByName("193.19.108.2"),
+            ipv4(194, 242, 2, 2),
+            ipv4(193, 19, 108, 2),
             InetAddress.getByName("2a07:e340::2"),
         )
         .build(),
@@ -151,8 +153,8 @@ fun OkHttpClient.Builder.dohControlD() = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://freedns.controld.com/p0".toHttpUrl())
         .bootstrapDnsHosts(
-            InetAddress.getByName("76.76.2.0"),
-            InetAddress.getByName("76.76.10.0"),
+            ipv4(76, 76, 2, 0),
+            ipv4(76, 76, 10, 0),
             InetAddress.getByName("2606:1a40::"),
             InetAddress.getByName("2606:1a40:1::"),
         )
@@ -167,7 +169,7 @@ fun OkHttpClient.Builder.dohNajalla() = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://dns.njal.la/dns-query".toHttpUrl())
         .bootstrapDnsHosts(
-            InetAddress.getByName("95.215.19.53"),
+            ipv4(95, 215, 19, 53),
             InetAddress.getByName("2001:67c:2354:2::53"),
         )
         .build(),
@@ -180,8 +182,8 @@ fun OkHttpClient.Builder.dohShecan() = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://free.shecan.ir/dns-query".toHttpUrl())
         .bootstrapDnsHosts(
-            InetAddress.getByName("178.22.122.100"),
-            InetAddress.getByName("185.51.200.2"),
+            ipv4(178, 22, 122, 100),
+            ipv4(185, 51, 200, 2),
         )
         .build(),
 )
@@ -190,8 +192,8 @@ fun OkHttpClient.Builder.dohLibreDNS() = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://doh.libredns.gr/dns-query".toHttpUrl())
         .bootstrapDnsHosts(
-            InetAddress.getByName("116.202.176.26"),  // IPv4 address for LibreDNS
-            InetAddress.getByName("192.71.166.92")   // Fallback IPv4 address
+            ipv4(116, 202, 176, 26),  // IPv4 address for LibreDNS
+            ipv4(192, 71, 166, 92)   // Fallback IPv4 address
         )
         .build()
 )
