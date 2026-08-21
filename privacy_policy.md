@@ -1,9 +1,9 @@
 # Privacy Policy
 
-Last Updated: Dec 30, 2024
+Last Updated: Aug 21, 2026
 
 ## Introduction
-This Privacy Policy describes how we collect, use, and handle your information when you use Dantotsu. We are committed to protecting your privacy and ensuring transparency about our data practices.
+This Privacy Policy describes how we collect, use, and handle your information when you use ReDantotsu (fork by Nahiro18, based on Dantotsu). We are committed to protecting your privacy and ensuring transparency about our data practices.
 
 ## Information We Collect
 
@@ -88,8 +88,8 @@ Under the General Data Protection Regulation (GDPR) and other data protection la
 - Request deletion of your comments and associated data
 
 To exercise these rights or request deletion of your data, you can contact the developer:
-- On AniList: "rebelonion"
-- On Discord: "@rebelonion"
+- On AniList: "rebelonion" (original) / "Nahiro18" (fork)
+- On Discord: "@rebelonion" / `https://discord.gg/GGdQumttZ` (fork)
 
 While we don't have an automated process for data deletion, we will process your request manually as soon as possible.
 
@@ -101,6 +101,6 @@ We may update this Privacy Policy from time to time. We will notify you of any c
 
 ## Contact Us
 If you have any questions about this Privacy Policy, please contact us via:
-- GitHub: [Dantotsu Issues](https://github.com/rebelonion/Dantotsu/issues)
-- Discord: "@rebelonion"
-- AniList: "rebelonion"
+- GitHub: [ReDantotsu Fork Issues](https://github.com/Nahiro18/ReDantotsu/issues) (original [Dantotsu Issues](https://github.com/rebelonion/Dantotsu/issues))
+- Discord: `https://discord.gg/GGdQumttZ` (fork) / "@rebelonion" (original)
+- AniList: "Nahiro18" (fork) / "rebelonion" (original)
