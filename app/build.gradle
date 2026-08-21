@@ -30,8 +30,8 @@ android {
         applicationId "app.redantotsu.asr"
         minSdk 23
         targetSdk 36
-        versionName "1.0.9"
-        versionCode 100000009
+        versionName "1.1.0"
+        versionCode 100001000
         signingConfig System.getenv("KEYSTORE_PATH") != null ? signingConfigs.release : signingConfigs.debug
 
     }
