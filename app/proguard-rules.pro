@@ -49,7 +49,7 @@
 -keep class uy.kohesive.injekt.** { *; }
 -keep class eu.kanade.tachiyomi.** { *; }
 -keep class kotlin.** { *; }
--dontwarn kotlin.**
+# -dontwarn kotlin.** removed (hide warnings)
 -keep class kotlinx.** { *; }
 -keepclassmembers class uy.kohesive.injekt.api.FullTypeReference {
     <init>(...);
