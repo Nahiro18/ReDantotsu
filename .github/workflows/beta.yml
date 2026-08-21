@@ -59,7 +59,7 @@ jobs:
           name: ReDantotsu
           retention-days: 5
           compression-level: 9
-          path: "app/build/outputs/apk/fdroid/alpha/ReDantotsu-universal-alpha.apk"
+          path: "app/build/outputs/apk/fdroid/alpha/*.apk"
 
     - name: Create GitHub Release
       if: startsWith(github.ref, 'refs/tags/v')
