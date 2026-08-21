@@ -97,6 +97,14 @@ class ThemeManager(private val context: Activity) {
         // Apply the dynamic colors to the activity
         val activity = context as Activity
         DynamicColors.applyToActivityIfAvailable(activity, options)
+
+        if (useOLED) {
+            val options2 = DynamicColorsOptions.Builder()
+                .setThemeOverlay(R.style.AppTheme_Amoled)
+                .build()
+            DynamicColors.applyToActivityIfAvailable(activity, options2)
+        }
+
         return false
     }
 
