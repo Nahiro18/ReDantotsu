@@ -19,9 +19,9 @@ android {
             def keystorePath = System.getenv("KEYSTORE_PATH")
             if (keystorePath != null) {
                 storeFile file(keystorePath)
-                storePassword System.getenv("KEYSTORE_PASSWORD") ?: "android"
-                keyAlias System.getenv("KEY_ALIAS") ?: "androiddebugkey"
-                keyPassword System.getenv("KEY_PASSWORD") ?: "android"
+                storePassword System.getenv("KEYSTORE_PASSWORD") ?: error("KEYSTORE_PASSWORD not set")
+                keyAlias System.getenv("KEY_ALIAS") ?: error("KEY_ALIAS not set")
+                keyPassword System.getenv("KEY_PASSWORD") ?: error("KEY_PASSWORD not set")
             }
         }
     }
