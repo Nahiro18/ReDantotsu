@@ -9,12 +9,12 @@ on:
       - custom-download-location
     paths-ignore:
       - '**/README.md'
+    tags:
+      - "v*.*.*"
   pull_request:
     branches: [ main ]
     paths-ignore:
       - '**/README.md'
-    tags:
-    - "v*.*.*"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
