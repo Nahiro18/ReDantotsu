@@ -80,6 +80,12 @@ private fun setupSocks5Proxy() {
             .addInterceptor(UserAgentInterceptor(::defaultUserAgentProvider))
             .addNetworkInterceptor(IgnoreGzipInterceptor())
             .addNetworkInterceptor(BrotliInterceptor)
+            .addNetworkInterceptor { chain ->
+                val response = chain.proceed(chain.request())
+                if (response.code in listOf(403, 503) || response.header("Server")?.contains("cloudflare", ignoreCase = true) == true) {
+                    response.newBuilder().header("Cache-Control", "no-store").build()
+                } else response
+            }
 
         class ConsoleLogger : HttpLoggingInterceptor.Logger {
             override fun log(message: String) {
