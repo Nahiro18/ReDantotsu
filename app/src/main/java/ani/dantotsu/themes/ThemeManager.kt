@@ -22,23 +22,12 @@ class ThemeManager(private val context: Activity) {
         val customTheme: Int = PrefManager.getVal(PrefName.CustomThemeInt)
         val useSource: Boolean = PrefManager.getVal(PrefName.UseSourceTheme)
         val useMaterial: Boolean = PrefManager.getVal(PrefName.UseMaterialYou)
-        if (useSource) {
-            val returnedEarly = applyDynamicColors(
-                useMaterial,
-                context,
-                useOLED,
-                fromImage,
-                useCustom = if (useCustomTheme) customTheme else null
-            )
-            if (!returnedEarly) return
-        } else if (useCustomTheme) {
-            val returnedEarly =
-                applyDynamicColors(useMaterial, context, useOLED, useCustom = customTheme)
-            if (!returnedEarly) return
-        } else {
-            val returnedEarly = applyDynamicColors(useMaterial, context, useOLED, useCustom = null)
-            if (!returnedEarly) return
-        }
+        val customForSource = if (useCustomTheme) customTheme else null
+        val bitmapForSource = if (useSource) fromImage else null
+        val custom = if (useSource) customForSource else if (useCustomTheme) customTheme else null
+        val bitmap = if (useSource) bitmapForSource else null
+        val returnedEarly = applyDynamicColors(useMaterial, context, useOLED, bitmap, custom)
+        if (!returnedEarly) return
         val theme: String = PrefManager.getVal(PrefName.Theme)
 
         val themeToApply = when (theme) {
@@ -108,25 +97,11 @@ class ThemeManager(private val context: Activity) {
         // Apply the dynamic colors to the activity
         val activity = context as Activity
         DynamicColors.applyToActivityIfAvailable(activity, options)
-
-        if (useOLED) {
-            val options2 = DynamicColorsOptions.Builder()
-                .setThemeOverlay(R.style.AppTheme_Amoled)
-                .build()
-            DynamicColors.applyToActivityIfAvailable(activity, options2)
-        }
-
         return false
     }
 
-    private fun isDarkThemeActive(context: Context): Boolean {
-        return when (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-            Configuration.UI_MODE_NIGHT_YES -> true
-            Configuration.UI_MODE_NIGHT_NO -> false
-            Configuration.UI_MODE_NIGHT_UNDEFINED -> false
-            else -> false
-        }
-    }
+    private fun isDarkThemeActive(context: Context): Boolean =
+        (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
 
 
     companion object {

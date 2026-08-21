@@ -53,7 +53,9 @@ class StatsFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        user = model.userProfile!!
+        val profile = model.userProfile
+        if (profile == null) return
+        user = profile
 
         binding.statisticList.setBaseline(activity.navBar)
 
@@ -85,7 +87,7 @@ class StatsFragment :
 
         binding.compare.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                activity.lifecycleScope.launch {
+                viewLifecycleOwner.lifecycleScope.launch {
                     if (Anilist.userid != null) {
                         withContext(Dispatchers.Main) {
                             binding.statisticProgressBar.visibility = View.VISIBLE
@@ -126,7 +128,7 @@ class StatsFragment :
             binding.statisticList.setBaseline(activity.navBar)
             binding.root.requestLayout()
             if (!loadedFirstTime) {
-                activity.lifecycleScope.launch {
+                viewLifecycleOwner.lifecycleScope.launch {
                     stats.clear()
                     stats.add(Anilist.query.getUserStatistics(user.id)?.data?.user)
                     withContext(Dispatchers.Main) {

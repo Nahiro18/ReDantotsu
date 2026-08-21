@@ -57,7 +57,9 @@ class ProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.root.setBaseline(activity.navBar)
 
-        user = model.userProfile!!
+        val profile = model.userProfile
+        if (profile == null) return
+        user = profile
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             model.setData(user.id)
         }
