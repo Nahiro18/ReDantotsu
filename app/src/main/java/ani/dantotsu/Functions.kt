@@ -279,9 +279,24 @@ fun Activity.setNavigationTheme() {
  * When nesting multiple scrolling views, only call this method on the inner most scrolling view.
  */
 fun ViewGroup.setBaseline(navBar: LiquidGlassBottomBar?) {
-    navBar?.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
     clipToPadding = false
-    setPadding(paddingLeft, paddingTop, paddingRight, navBarHeight + (navBar?.measuredHeight ?: 0))
+    val navBarExtra = try {
+        if (navBar != null && navBar.isAttachedToWindow) {
+            navBar.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+            navBar.measuredHeight
+        } else 0
+    } catch (_: IllegalStateException) { 0 }
+    setPadding(paddingLeft, paddingTop, paddingRight, navBarHeight + navBarExtra)
+    // If navBar wasn't attached yet, re-apply once it attaches (e.g. after restore from background)
+    if (navBar != null && !navBar.isAttachedToWindow) {
+        navBar.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: View) {
+                v.removeOnAttachStateChangeListener(this)
+                post { setBaseline(navBar) }
+            }
+            override fun onViewDetachedFromWindow(v: View) {}
+        })
+    }
 }
 
 /**
@@ -290,15 +305,29 @@ fun ViewGroup.setBaseline(navBar: LiquidGlassBottomBar?) {
  * When nesting multiple scrolling views, only call this method on the inner most scrolling view.
  */
 fun ViewGroup.setBaseline(navBar: LiquidGlassBottomBar?, overlayView: View) {
-    navBar?.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
-    overlayView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
     clipToPadding = false
+    val navBarExtra = try {
+        if (navBar != null && navBar.isAttachedToWindow) {
+            navBar.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+            navBar.measuredHeight
+        } else 0
+    } catch (_: IllegalStateException) { 0 }
+    overlayView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
     setPadding(
         paddingLeft,
         paddingTop,
         paddingRight,
-        navBarHeight + (navBar?.measuredHeight ?: 0) + overlayView.measuredHeight
+        navBarHeight + navBarExtra + overlayView.measuredHeight
     )
+    if (navBar != null && !navBar.isAttachedToWindow) {
+        navBar.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: View) {
+                v.removeOnAttachStateChangeListener(this)
+                post { setBaseline(navBar, overlayView) }
+            }
+            override fun onViewDetachedFromWindow(v: View) {}
+        })
+    }
 }
 
 fun Activity.reloadActivity() {
