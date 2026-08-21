@@ -412,7 +412,7 @@ class PlayerSettingsActivity :
             )
         binding.videoSubLanguage.setOnClickListener {
             customAlertDialog().apply {
-                setTitle(getString(R.string.subtitle_langauge))
+                setTitle(getString(R.string.subtitle_language))
                 singleChoiceItems(
                     subLanguages,
                     PrefManager.getVal(PrefName.SubLanguage),

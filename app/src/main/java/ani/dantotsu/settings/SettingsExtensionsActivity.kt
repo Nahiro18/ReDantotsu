@@ -243,8 +243,8 @@ class SettingsExtensionsActivity : AppCompatActivity() {
                     ),
                     Settings(
                         type = 2,
-                        name = getString(R.string.NSFWExtention),
-                        desc = getString(R.string.NSFWExtention_desc),
+                        name = getString(R.string.NSFWExtension),
+                        desc = getString(R.string.NSFWExtension_desc),
                         icon = R.drawable.ic_round_nsfw_24,
                         isChecked = PrefManager.getVal(PrefName.NSFWExtension),
                         switch = { isChecked, _ ->
