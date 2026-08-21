@@ -9,6 +9,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
+import ani.dantotsu.BuildConfig
 import ani.dantotsu.R
 import ani.dantotsu.themes.ThemeManager
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -42,8 +43,13 @@ class CookieCatcher : AppCompatActivity() {
             settings.javaScriptEnabled = true
             settings.databaseEnabled = true
             settings.domStorageEnabled = true
+            settings.allowFileAccess = false
+            settings.allowContentAccess = false
+            settings.allowFileAccessFromFileURLs = false
+            settings.allowUniversalAccessFromFileURLs = false
+            settings.mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
         }
-        WebView.setWebContentsDebuggingEnabled(true)
+        if (BuildConfig.DEBUG) WebView.setWebContentsDebuggingEnabled(true)
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(
                 view: WebView?,
