@@ -48,14 +48,23 @@ abstract class WebViewBottomDialog : BottomSheetDialogFragment() {
     @SuppressLint("SetJavaScriptEnabled")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.webViewTitle.text = title
+        // Validate URL scheme (only https/http allowed, block file/javascript)
+        val url = location.url
+        require(url.startsWith("https://") || url.startsWith("http://")) { "Invalid URL scheme" }
         binding.webView.settings.apply {
             javaScriptEnabled = true
+            domStorageEnabled = true
             userAgentString = defaultHeaders["User-Agent"]
+            allowFileAccess = false
+            allowContentAccess = false
+            allowFileAccessFromFileURLs = false
+            allowUniversalAccessFromFileURLs = false
+            mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
+            safeBrowsingEnabled = true
         }
         cookies?.setAcceptThirdPartyCookies(binding.webView, true)
         binding.webView.webViewClient = webViewClient
-        binding.webView.loadUrl(location.url, location.headers)
-        this.dismiss()
+        binding.webView.loadUrl(url, location.headers)
     }
 
     override fun onDestroy() {
