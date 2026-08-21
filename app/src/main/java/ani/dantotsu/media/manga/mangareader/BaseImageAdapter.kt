@@ -144,8 +144,8 @@ abstract class BaseImageAdapter(
                         .let {
                             if (link.url.startsWith("file://")) {
                                 it.load(link.url)
-                                    .skipMemoryCache(true)
-                                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                    .skipMemoryCache(false)
+                                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                             } else {
                                 it.load(GlideUrl(link.url) { link.headers })
                             }
@@ -176,12 +176,12 @@ abstract class BaseImageAdapter(
                             val localFile = File(link.url)
                             if (localFile.exists()) {
                                 it.load(localFile.absoluteFile)
-                                    .skipMemoryCache(true)
-                                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                    .skipMemoryCache(false)
+                                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                             } else if (link.url.startsWith("content://")) {
                                 it.load(Uri.parse(link.url))
-                                    .skipMemoryCache(true)
-                                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                    .skipMemoryCache(false)
+                                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                             } else {
                                 mangaCache.get(link.url)?.let { imageData ->
                                     val bitmap = imageData.fetchAndProcessImage(
@@ -189,8 +189,8 @@ abstract class BaseImageAdapter(
                                         imageData.source
                                     )
                                     it.load(bitmap)
-                                        .skipMemoryCache(true)
-                                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                        .skipMemoryCache(false)
+                                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                 }
 
                             }
