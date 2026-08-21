@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="dantotsuprefs.xml" />
+        <exclude domain="sharedpref" path="facebook_auth.xml" />
+        <exclude domain="database" path="." />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="dantotsuprefs.xml" />
+        <exclude domain="sharedpref" path="facebook_auth.xml" />
+        <exclude domain="database" path="." />
+    </device-transfer>
+</data-extraction-rules>

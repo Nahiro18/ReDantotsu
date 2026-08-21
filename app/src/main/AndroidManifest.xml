@@ -62,6 +62,8 @@
     <application
         android:name=".App"
         android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:banner="@mipmap/ic_banner_foreground"
         android:enableOnBackInvokedCallback="true"
         android:icon="${icon_placeholder}"
@@ -72,7 +74,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Dantotsu"
         android:usesCleartextTraffic="true"
-        tools:ignore="AllowBackup"
         tools:targetApi="tiramisu">
 
         <receiver
