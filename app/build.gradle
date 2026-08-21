@@ -4,7 +4,7 @@ plugins {
     id 'kotlinx-serialization'
     id 'org.jetbrains.kotlin.android'
     id 'com.google.devtools.ksp'
-    id 'org.jetbrains.kotlin.plugin.compose' version '2.2.0'
+    id 'org.jetbrains.kotlin.plugin.compose' version '2.2.20'
 }
 
 def gitCommitHash = providers.exec {
@@ -12,7 +12,7 @@ def gitCommitHash = providers.exec {
 }.standardOutput.asText.get().trim()
 
 android {
-    compileSdk 35
+    compileSdk 36
 
     signingConfigs {
         release {
@@ -29,7 +29,7 @@ android {
     defaultConfig {
         applicationId "app.redantotsu.asr"
         minSdk 23
-        targetSdk 35
+        targetSdk 36
         versionName "1.0.8"
         versionCode 100000008
         signingConfig System.getenv("KEYSTORE_PATH") != null ? signingConfigs.release : signingConfigs.debug
