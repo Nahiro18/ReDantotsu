@@ -86,7 +86,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = '17'
-        freeCompilerArgs = ["-Xcontext-parameters"]
+        freeCompilerArgs = ["-Xcontext-receivers", "-Xmulti-platform"]
     }
     namespace 'ani.dantotsu'
     
