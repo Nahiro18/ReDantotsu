@@ -37,7 +37,8 @@ class StatsFragment :
     private var type: MediaType = MediaType.ANIME
     private var statType: StatType = StatType.COUNT
     private lateinit var user: Query.UserProfile
-    private lateinit var activity: ProfileActivity
+    private val activity: ProfileActivity
+        get() = requireActivity() as ProfileActivity
     private var loadedFirstTime = false
     private val model: ProfileViewModel by activityViewModels()
 
@@ -52,8 +53,6 @@ class StatsFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        activity = requireActivity() as ProfileActivity
-
         user = model.userProfile!!
 
         binding.statisticList.setBaseline(activity.navBar)

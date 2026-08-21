@@ -38,7 +38,8 @@ import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment() {
     lateinit var binding: FragmentProfileBinding
-    private lateinit var activity: ProfileActivity
+    private val activity: ProfileActivity
+        get() = requireActivity() as ProfileActivity
     private lateinit var user: Query.UserProfile
     private val favStaff = arrayListOf<Author>()
     private val favCharacter = arrayListOf<Character>()
@@ -54,8 +55,6 @@ class ProfileFragment : Fragment() {
     val model: ProfileViewModel by activityViewModels()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        activity = requireActivity() as ProfileActivity
-
         binding.root.setBaseline(activity.navBar)
 
         user = model.userProfile!!
