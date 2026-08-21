@@ -1,4 +1,4 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
     repositories {
@@ -27,7 +27,7 @@ tasks.register('clean', Delete) {
 }
 
 
-tasks.withType(KotlinJvmCompile).configureEach {
+tasks.withType(KotlinCompile).configureEach {
     compilerOptions {
         freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
     }
