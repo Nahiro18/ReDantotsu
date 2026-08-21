@@ -116,7 +116,11 @@ private fun setupSocks5Proxy() {
       builder.build()
      }
 
-    val downloadClient = client.newBuilder().callTimeout(20, TimeUnit.MINUTES).build()
+    val downloadClient = client.newBuilder()
+        .connectTimeout(15, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .callTimeout(5, TimeUnit.MINUTES)
+        .build()
 
     /**
      * @deprecated Since extension-lib 1.5

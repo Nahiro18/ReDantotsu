@@ -1217,22 +1217,6 @@ class SpinnerNoSwipe : androidx.appcompat.widget.AppCompatSpinner {
     }
 }
 
-@SuppressLint("RestrictedApi")
-class CustomBottomNavBar @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null
-) : BottomNavigationView(context, attrs) {
-    init {
-        ViewUtils.doOnApplyWindowInsets(
-            this
-        ) { view, insets, initialPadding ->
-            initialPadding.bottom = 0
-            updateLayoutParams<MarginLayoutParams> { bottomMargin = navBarHeight }
-            initialPadding.applyToView(view)
-            insets
-        }
-    }
-}
-
 fun getCurrentBrightnessValue(context: Context): Float {
     fun getMax(): Int {
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager

@@ -383,7 +383,7 @@ object PrefManager {
     }
 
     private fun getPrefLocation(prefLoc: Location): SharedPreferences {
-        return when (prefLoc) {
+        val pref = when (prefLoc) {
             Location.General -> generalPreferences
             Location.UI -> uiPreferences
             Location.Player -> playerPreferences
@@ -392,7 +392,8 @@ object PrefManager {
             Location.Irrelevant -> irrelevantPreferences
             Location.AnimeDownloads -> animeDownloadsPreferences
             Location.Protected -> protectedPreferences
-        }!!
+        }
+        return requireNotNull(pref) { "PrefManager not initialized for $prefLoc. Call PrefManager.init(context) first." }
     }
 
     private fun <T> serializeClass(key: String, value: T, location: Location) {
