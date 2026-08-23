@@ -188,17 +188,8 @@ class App : Application() {
 
         private fun applyImmersiveMode(activity: Activity) {
             if (!PrefManager.getVal<Boolean>(PrefName.ImmersiveMode)) return
-            androidx.core.view.WindowCompat.setDecorFitsSystemWindows(activity.window, false)
-            val decor = activity.window.decorView
-            val listener = immersiveFocusListeners.getOrPut(activity) {
-                android.view.ViewTreeObserver.OnWindowFocusChangeListener { hasFocus ->
-                    if (hasFocus && PrefManager.getVal<Boolean>(PrefName.ImmersiveMode)) {
-                        activity.hideSystemBars()
-                    }
-                }
-            }
-            decor.viewTreeObserver.addOnWindowFocusChangeListener(listener)
-            activity.hideSystemBars()
+            // Keep Android navigation buttons visible - don't hide system bars
+            return
         }
 
         override fun onActivityPaused(p0: Activity) {}

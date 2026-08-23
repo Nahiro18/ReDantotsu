@@ -137,7 +137,7 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
             }
         }
         
-        val marginPx = (16 * resources.displayMetrics.density).toInt()
+        val marginPx = (16 * resources.displayMetrics.density).toInt() + navBarHeight
         navBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = marginPx
         }
@@ -337,7 +337,7 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        val marginPx = (16 * resources.displayMetrics.density).toInt()
+        val marginPx = (16 * resources.displayMetrics.density).toInt() + navBarHeight
         val params: ViewGroup.MarginLayoutParams = navBar.layoutParams as ViewGroup.MarginLayoutParams
         params.updateMargins(bottom = marginPx)
         navBar.requestLayout()
