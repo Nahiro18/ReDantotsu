@@ -168,6 +168,11 @@ class App : Application() {
     inner class FTActivityLifecycleCallbacks : ActivityLifecycleCallbacks {
         var currentActivity: Activity? = null
         var lastActivity: String? = null
+
+        // Keeps one focus listener per activity so system bars are re-hidden
+        // every time the window regains focus while Immersive Mode is enabled.
+        private val immersiveFocusListeners = java.util.WeakHashMap<Activity, android.view.ViewTreeObserver.OnWindowFocusChangeListener>()
+
         override fun onActivityCreated(p0: Activity, p1: Bundle?) {
             lastActivity = p0.javaClass.simpleName
         }
@@ -178,6 +183,22 @@ class App : Application() {
 
         override fun onActivityResumed(p0: Activity) {
             currentActivity = p0
+            applyImmersiveMode(p0)
+        }
+
+        private fun applyImmersiveMode(activity: Activity) {
+            if (!PrefManager.getVal<Boolean>(PrefName.ImmersiveMode)) return
+            androidx.core.view.WindowCompat.setDecorFitsSystemWindows(activity.window, false)
+            val decor = activity.window.decorView
+            val listener = immersiveFocusListeners.getOrPut(activity) {
+                android.view.ViewTreeObserver.OnWindowFocusChangeListener { hasFocus ->
+                    if (hasFocus && PrefManager.getVal<Boolean>(PrefName.ImmersiveMode)) {
+                        activity.hideSystemBars()
+                    }
+                }
+            }
+            decor.viewTreeObserver.addOnWindowFocusChangeListener(listener)
+            activity.hideSystemBars()
         }
 
         override fun onActivityPaused(p0: Activity) {}

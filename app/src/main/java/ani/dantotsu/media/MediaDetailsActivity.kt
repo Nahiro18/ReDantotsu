@@ -137,15 +137,9 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
             }
         }
         
-        // CORRECCIÓN SEGURA APLICADA AQUÍ (Sin usar .toPx)
-        val marginDp = if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) 8 else 32
-        val marginPx = (marginDp * resources.displayMetrics.density).toInt()
-        val navBarRightMargin = if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) navBarHeight else 0
-        val navBarBottomMargin = if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) marginPx else navBarHeight + marginPx
-        
+        val marginPx = (16 * resources.displayMetrics.density).toInt()
         navBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            rightMargin = navBarRightMargin
-            bottomMargin = navBarBottomMargin
+            bottomMargin = marginPx
         }
         
         binding.mediaBanner.updateLayoutParams { height += statusBarHeight }
@@ -343,13 +337,10 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        val marginDp = if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) 8 else 32
-        val marginPx = (marginDp * resources.displayMetrics.density).toInt()
-        val rightMargin = if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) navBarHeight else 0
-        val bottomMargin = if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) marginPx else navBarHeight + marginPx
-        
+        val marginPx = (16 * resources.displayMetrics.density).toInt()
         val params: ViewGroup.MarginLayoutParams = navBar.layoutParams as ViewGroup.MarginLayoutParams
-        params.updateMargins(right = rightMargin, bottom = bottomMargin)
+        params.updateMargins(bottom = marginPx)
+        navBar.requestLayout()
     }
 
     override fun onResume() {

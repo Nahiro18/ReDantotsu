@@ -63,9 +63,7 @@
                 <LinearLayout
                     android:id="@+id/mediaCollapseContainer"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:orientation="vertical">
+                    android:layout_height="wrap_content" android:orientation="vertical">
 
                     <LinearLayout
                         android:id="@+id/mediaTitleCollapseContainer"
@@ -112,9 +110,7 @@
                             android:id="@+id/mediaAddToList"
                             style="@style/Widget.Material3.Button.OutlinedButton"
                             android:layout_width="match_parent"
-                            android:layout_height="48dp"
-                            android:layout_gravity="bottom"
-                            android:layout_marginTop="8dp"
+                            android:layout_height="48dp" android:layout_marginTop="8dp"
                             android:ellipsize="marquee"
                             android:fontFamily="@font/poppins_bold"
                             android:insetTop="0dp"
@@ -422,9 +418,8 @@
 
     <ani.dantotsu.widgets.LiquidGlassBottomBar
         android:id="@+id/mediaBottomBar"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:maxWidth="400dp"
+        android:layout_width="320dp"
+        android:layout_height="56dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
