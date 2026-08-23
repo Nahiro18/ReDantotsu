@@ -180,9 +180,9 @@ fun LiquidBottomTabs(
                     onDrawSurface = { drawRect(containerColor) }
                 )
                 .then(interactiveHighlight.modifier)
-                .height(64f.dp)
+                .height(48f.dp)
                 .fillMaxWidth()
-                .padding(4f.dp),
+                .padding(horizontal = 4f.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             CompositionLocalProvider(

@@ -86,7 +86,7 @@ class LiquidGlassBottomBar @JvmOverloads constructor(
         val backdrop = rememberLayerBackdrop()
         val coroutineScope = rememberCoroutineScope()
         
-        Box(modifier = Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.fillMaxSize()) {
             Box(
                 modifier = Modifier
                     .matchParentSize()
@@ -103,8 +103,7 @@ class LiquidGlassBottomBar @JvmOverloads constructor(
                 backdrop = backdrop,
                 tabsCount = tabs.size.coerceAtLeast(1),
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(12.dp)
+                    .align(Alignment.Center)
             ) {
                 tabs.forEachIndexed { index, tab ->
                     LiquidBottomTab(onClick = {
@@ -135,9 +134,8 @@ class LiquidGlassBottomBar @JvmOverloads constructor(
         
         Row(
             modifier = Modifier
-                .padding(horizontal = 24.dp, vertical = 16.dp)
-                .fillMaxWidth()
-                .height(60.dp)
+                .padding(horizontal = 12.dp)
+                .fillMaxSize()
                 .shadow(8.dp, shape)
                 .clip(shape)
                 .background(bgColor)
