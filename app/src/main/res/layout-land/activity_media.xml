@@ -4,11 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal">
+    android:orientation="vertical">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:layout_weight="1">
 
         <com.google.android.material.appbar.AppBarLayout
@@ -149,7 +149,7 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:minHeight="64dp"
-                    android:orientation="horizontal"
+                    android:orientation="vertical"
                     app:layout_scrollFlags="scroll|enterAlways|snap"
                     tools:ignore="UselessParent">
 
@@ -158,7 +158,7 @@
                         android:id="@+id/mediaTitle"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_gravity="center_vertical"
+                        android:layout_gravity="center_horizontal|bottom"
                         android:ellipsize="marquee"
                         android:focusable="true"
                         android:focusableInTouchMode="true"
@@ -324,7 +324,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:visibility="gone"
                 tools:ignore="UseCompoundDrawables">
 
@@ -332,7 +332,7 @@
                     android:id="@+id/commentReplyTo"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
+                    android:layout_gravity="center_horizontal|bottom"
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="16dp"
                     android:layout_weight="1"
@@ -348,7 +348,7 @@
                     android:id="@+id/commentReplyToCancel"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:layout_gravity="center_vertical"
+                    android:layout_gravity="center_horizontal|bottom"
                     android:layout_marginEnd="16dp"
                     android:background="?android:attr/selectableItemBackground"
                     app:srcCompat="@drawable/ic_round_close_24"
@@ -361,7 +361,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="?android:colorBackground"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:paddingTop="8dp"
                 android:paddingBottom="8dp">
 
@@ -422,18 +422,13 @@
 
     <ani.dantotsu.widgets.LiquidGlassBottomBar
         android:id="@+id/mediaBottomBar"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_horizontal|bottom"
-        android:layout_weight="0"
-        android:padding="0dp"
-        android:elevation="8dp"
-        app:itemActiveIndicatorStyle="@style/BottomNavBar"
-        app:itemIconTint="@color/tab_layout_icon"
-        app:itemRippleColor="#00000000"
-        app:itemTextAppearanceActive="@style/NavBarText"
-        app:itemTextAppearanceInactive="@style/NavBarText"
-        app:itemTextColor="@color/tab_layout_icon" />
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:maxWidth="400dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:layout_gravity="center_horizontal|bottom" android:elevation="8dp" />
 
 </LinearLayout>
 
