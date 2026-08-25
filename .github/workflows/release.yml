@@ -111,7 +111,7 @@ jobs:
           if [ -n "$ASSET_LIST" ]; then break; fi
           sleep 10
         done
-        CONTENT="**RELEASE ${RELEASE_TAG}** - **Whats New?** ${RELEASE_URL}"$'\n\n'"${ASSET_LIST}"$'\n\n'"Reporta bugs en <#1539645809547550782>"
+        CONTENT="**RELEASE ${RELEASE_TAG}** - **Whats New?** ${RELEASE_URL}"$'\n\n'"${ASSET_LIST}"$'\n\n'"Report bugs in <#1539645809547550782>"
         PAYLOAD=$(jq -n \
           --arg username "ReDantotsu Releases" \
           --arg title "\ud83c\udf89 New Release: $RELEASE_TAG" \
