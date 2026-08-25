@@ -73,10 +73,18 @@ jobs:
     - name: Get release notes from annotated tag
       if: startsWith(github.ref, 'refs/tags/v')
       id: notes
+      env:
+        REPO_NAME: ${{ github.repository }}
+        GH_TOKEN: ${{ github.token }}
       run: |
+        TAG_SHA=$(curl -s -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/$REPO_NAME/git/ref/tags/$GITHUB_REF_NAME" | jq -r '.object.sha // empty')
+        NOTES=""
+        if [ -n "$TAG_SHA" ]; then
+          NOTES=$(curl -s -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/$REPO_NAME/git/tags/$TAG_SHA" | jq -r '.message // empty')
+        fi
         {
           echo 'NOTES<<TAGMSG'
-          git tag -l --format='%(contents)' "$GITHUB_REF_NAME"
+          echo "$NOTES"
           echo TAGMSG
         } >> "$GITHUB_OUTPUT"
 
@@ -85,6 +93,7 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         files: app/build/outputs/apk/fdroid/alpha/*.apk
+        generate_release_notes: false
         body: ${{ steps.notes.outputs.NOTES }}
 
     - name: Notify Discord (Release)
@@ -93,12 +102,8 @@ jobs:
         WEBHOOK_RELEASE: "https://discordapp.com/api/webhooks/1540855125893972131/OKQDvYiqPbkMLYCi0cXrIjV0sQjcodJrpdYmdCBn0muITJ7p1Ze7BKPpqzm2NxM7vP53"
         RELEASE_TAG: ${{ github.ref_name }}
         REPO_NAME: ${{ github.repository }}
-        NOTES: ${{ steps.notes.outputs.NOTES }}
       run: |
-        # 1. Wait a moment for the release assets to be available
         sleep 10
-
-        # 2. Fetch release APK links
         RELEASE_URL="https://github.com/$REPO_NAME/releases/tag/$RELEASE_TAG"
         ASSET_LIST=""
         for i in 1 2 3; do
@@ -106,12 +111,11 @@ jobs:
           if [ -n "$ASSET_LIST" ]; then break; fi
           sleep 10
         done
-
-        # 3. Assemble JSON payload: What's New (link to release) + APK download links
+        CONTENT="**RELEASE ${RELEASE_TAG}** - **Whats New?** ${RELEASE_URL}"$'\n\n'"${ASSET_LIST}"$'\n\n'"Reporta bugs en <#1539645809547550782>"
         PAYLOAD=$(jq -n \
           --arg username "ReDantotsu Releases" \
           --arg title "\ud83c\udf89 New Release: $RELEASE_TAG" \
-          --arg content "**What'\''s New?** $RELEASE_URL"$'\n\n'"$ASSET_LIST" \
+          --arg content "$CONTENT" \
           --arg footer "Version $RELEASE_TAG" \
           --arg url "$RELEASE_URL" \
           --argjson color 16753920 \
