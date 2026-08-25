@@ -229,10 +229,12 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="?android:colorBackground"
             android:orientation="vertical"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
             <androidx.viewpager2.widget.ViewPager2
+                android:background="?android:colorBackground"
                 android:id="@+id/mediaViewPager"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
