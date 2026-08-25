@@ -349,12 +349,16 @@ class MainActivity : AppCompatActivity() {
                     val isMAL = intent.extras?.getBoolean("mal") ?: false
                     val cont = intent.extras?.getBoolean("continue") ?: false
                     if (id != null && id != 0) {
-                        val media = withContext(Dispatchers.IO) { Anilist.query.getMedia(id, isMAL) }
-                        if (media != null) {
-                            media.cameFromContinue = cont
-                            startActivity(Intent(this@MainActivity, MediaDetailsActivity::class.java).putExtra("media", media as Serializable))
-                        } else {
-                            snackString(this@MainActivity.getString(R.string.anilist_not_found))
+                        try {
+                            val media = withContext(Dispatchers.IO) { Anilist.query.getMedia(id, isMAL) }
+                            if (media != null) {
+                                media.cameFromContinue = cont
+                                startActivity(Intent(this@MainActivity, MediaDetailsActivity::class.java).putExtra("media", media as Serializable))
+                            } else {
+                                withContext(Dispatchers.Main) { snackString(this@MainActivity.getString(R.string.anilist_not_found)) }
+                            }
+                        } catch (e: Exception) {
+                            withContext(Dispatchers.Main) { snackString("Failed to load media: ${e.message}") }
                         }
                     }
                     val username = intent.extras?.getString("username")

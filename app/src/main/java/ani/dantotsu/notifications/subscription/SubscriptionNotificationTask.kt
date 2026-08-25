@@ -225,11 +225,7 @@ class SubscriptionNotificationTask : Task {
             }
         return PendingIntent.getActivity(
             context, mediaId, notifyIntent,
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_ONE_SHOT
-            } else {
-                PendingIntent.FLAG_ONE_SHOT
-            }
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
     }
 
