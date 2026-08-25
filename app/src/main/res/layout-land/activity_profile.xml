@@ -44,8 +44,10 @@
 
     <ani.dantotsu.widgets.LiquidGlassBottomBar
         android:id="@+id/profileNavBar"
-        android:layout_width="320dp"
-        android:layout_height="56dp"
-        android:layout_gravity="center_horizontal|bottom" android:elevation="8dp" />
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:maxWidth="400dp"
+        android:layout_gravity="center_horizontal|bottom"
+        android:elevation="8dp" />
 
 </LinearLayout>

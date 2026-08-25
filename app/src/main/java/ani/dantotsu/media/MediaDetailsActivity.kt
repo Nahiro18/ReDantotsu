@@ -79,6 +79,8 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val contract = ActivityResultContracts.OpenDocumentTree()
+        launcher = LauncherWrapper(this, contract)
         var media: Media = intent.getSerialized("media") ?: mediaSingleton ?: emptyMedia()
         val id = intent.getIntExtra("mediaId", -1)
         if (id != -1 && (media.name == "No media found" || media.id == 0)) {
@@ -106,8 +108,6 @@ class MediaDetailsActivity : AppCompatActivity(), AppBarLayout.OnOffsetChangedLi
 
     private fun initWithMedia(initialMedia: Media) {
         var media = initialMedia
-        val contract = ActivityResultContracts.OpenDocumentTree()
-        launcher = LauncherWrapper(this, contract)
 
         mediaSingleton = null
         ThemeManager(this).applyTheme(MediaSingleton.bitmap)
