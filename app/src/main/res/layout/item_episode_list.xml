@@ -191,5 +191,16 @@
         android:background="?android:colorBackground"
         android:visibility="gone" />
 
+    <CheckBox
+        android:id="@+id/itemBatchCheck"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="top|end"
+        android:layout_margin="8dp"
+        android:background="@drawable/card_outline"
+        android:buttonTint="?attr/colorPrimary"
+        android:visibility="gone"
+        tools:ignore="ContentDescription" />
+
 
 </androidx.cardview.widget.CardView>

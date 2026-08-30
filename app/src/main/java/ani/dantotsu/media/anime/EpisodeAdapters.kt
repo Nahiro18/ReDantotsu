@@ -102,6 +102,14 @@ class EpisodeAdapter(
             is EpisodeListViewHolder -> {
                 val binding = holder.binding
                 setAnimation(fragment.requireContext(), holder.binding.root)
+                // Batch mode UI
+                binding.itemBatchCheck.isVisible = batchMode
+                binding.itemBatchCheck.isChecked = selectedForBatch.contains(ep.number)
+                binding.itemBatchCheck.setOnClickListener { toggleBatchSelection(ep.number) }
+                holder.itemView.setOnClickListener {
+                    if (batchMode) toggleBatchSelection(ep.number)
+                    else fragment.onEpisodeClick(ep.number)
+                }
 
                 val thumb =
                     ep.thumb?.let { if (it.url.isNotEmpty()) GlideUrl(it.url) { it.headers } else null }
@@ -150,6 +158,13 @@ class EpisodeAdapter(
             is EpisodeGridViewHolder -> {
                 val binding = holder.binding
                 setAnimation(fragment.requireContext(), holder.binding.root)
+                binding.itemBatchCheck.isVisible = batchMode
+                binding.itemBatchCheck.isChecked = selectedForBatch.contains(ep.number)
+                binding.itemBatchCheck.setOnClickListener { toggleBatchSelection(ep.number) }
+                holder.itemView.setOnClickListener {
+                    if (batchMode) toggleBatchSelection(ep.number)
+                    else fragment.onEpisodeClick(ep.number)
+                }
 
                 val thumb =
                     ep.thumb?.let { if (it.url.isNotEmpty()) GlideUrl(it.url) { it.headers } else null }
@@ -193,6 +208,13 @@ class EpisodeAdapter(
             is EpisodeCompactViewHolder -> {
                 val binding = holder.binding
                 setAnimation(fragment.requireContext(), holder.binding.root)
+                binding.itemBatchCheck.isVisible = batchMode
+                binding.itemBatchCheck.isChecked = selectedForBatch.contains(ep.number)
+                binding.itemBatchCheck.setOnClickListener { toggleBatchSelection(ep.number) }
+                holder.itemView.setOnClickListener {
+                    if (batchMode) toggleBatchSelection(ep.number)
+                    else fragment.onEpisodeClick(ep.number)
+                }
                 binding.itemEpisodeNumber.text = ep.number
                 binding.itemEpisodeFillerView.isVisible = ep.filler
                 if (media.userProgress != null) {
@@ -221,6 +243,35 @@ class EpisodeAdapter(
 
     private val activeDownloads = mutableSetOf<String>()
     private val downloadedEpisodes = mutableSetOf<String>()
+    var batchMode = false
+    val selectedForBatch = mutableSetOf<String>()
+    var onBatchSelectionChanged: ((Int) -> Unit)? = null
+
+    fun toggleBatchSelection(ep: String) {
+        if (selectedForBatch.contains(ep)) selectedForBatch.remove(ep) else selectedForBatch.add(ep)
+        val pos = arr.indexOfFirst { it.number == ep }
+        if (pos != -1) notifyItemChanged(pos)
+        onBatchSelectionChanged?.invoke(selectedForBatch.size)
+    }
+    fun enterBatchMode(ep: String) {
+        batchMode = true
+        selectedForBatch.clear()
+        selectedForBatch.add(ep)
+        notifyDataSetChanged()
+        onBatchSelectionChanged?.invoke(selectedForBatch.size)
+    }
+    fun exitBatchMode() {
+        batchMode = false
+        selectedForBatch.clear()
+        notifyDataSetChanged()
+        onBatchSelectionChanged?.invoke(0)
+    }
+    fun selectAllBatch() {
+        selectedForBatch.clear()
+        selectedForBatch.addAll(arr.map { it.number })
+        notifyDataSetChanged()
+        onBatchSelectionChanged?.invoke(selectedForBatch.size)
+    }
 
     fun startDownload(episodeNumber: String) {
         activeDownloads.add(episodeNumber)
@@ -285,8 +336,16 @@ class EpisodeAdapter(
         RecyclerView.ViewHolder(binding.root) {
         init {
             itemView.setOnClickListener {
-                if (bindingAdapterPosition < arr.size && bindingAdapterPosition >= 0)
-                    fragment.onEpisodeClick(arr[bindingAdapterPosition].number)
+                if (bindingAdapterPosition < arr.size && bindingAdapterPosition >= 0) {
+                    if (batchMode) toggleBatchSelection(arr[bindingAdapterPosition].number)
+                    else fragment.onEpisodeClick(arr[bindingAdapterPosition].number)
+                }
+            }
+            itemView.setOnLongClickListener {
+                if (bindingAdapterPosition < arr.size && bindingAdapterPosition >= 0 && !batchMode) {
+                    enterBatchMode(arr[bindingAdapterPosition].number)
+                    true
+                } else false
             }
         }
     }
@@ -295,8 +354,16 @@ class EpisodeAdapter(
         RecyclerView.ViewHolder(binding.root) {
         init {
             itemView.setOnClickListener {
-                if (bindingAdapterPosition < arr.size && bindingAdapterPosition >= 0)
-                    fragment.onEpisodeClick(arr[bindingAdapterPosition].number)
+                if (bindingAdapterPosition < arr.size && bindingAdapterPosition >= 0) {
+                    if (batchMode) toggleBatchSelection(arr[bindingAdapterPosition].number)
+                    else fragment.onEpisodeClick(arr[bindingAdapterPosition].number)
+                }
+            }
+            itemView.setOnLongClickListener {
+                if (bindingAdapterPosition < arr.size && bindingAdapterPosition >= 0 && !batchMode) {
+                    enterBatchMode(arr[bindingAdapterPosition].number)
+                    true
+                } else false
             }
         }
     }
@@ -307,8 +374,16 @@ class EpisodeAdapter(
 
         init {
             itemView.setOnClickListener {
-                if (bindingAdapterPosition < arr.size && bindingAdapterPosition >= 0)
-                    fragment.onEpisodeClick(arr[bindingAdapterPosition].number)
+                if (bindingAdapterPosition < arr.size && bindingAdapterPosition >= 0) {
+                    if (batchMode) toggleBatchSelection(arr[bindingAdapterPosition].number)
+                    else fragment.onEpisodeClick(arr[bindingAdapterPosition].number)
+                }
+            }
+            itemView.setOnLongClickListener {
+                if (bindingAdapterPosition < arr.size && bindingAdapterPosition >= 0 && !batchMode) {
+                    enterBatchMode(arr[bindingAdapterPosition].number)
+                    true
+                } else false
             }
             binding.itemDownload.setOnClickListener {
                 if (0 <= bindingAdapterPosition && bindingAdapterPosition < arr.size) {

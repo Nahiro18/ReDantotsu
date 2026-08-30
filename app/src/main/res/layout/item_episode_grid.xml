@@ -124,4 +124,14 @@
         app:srcCompat="@drawable/ic_round_remove_red_eye_24"
         app:tint="?attr/colorOnBackground"
         tools:ignore="ContentDescription" />
-</androidx.cardview.widget.CardView>
+
+    <CheckBox
+        android:id="@+id/itemBatchCheck"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="top|end"
+        android:layout_margin="8dp"
+        android:background="@drawable/card_outline"
+        android:buttonTint="?attr/colorPrimary"
+        android:visibility="gone"
+        tools:ignore="ContentDescription" /></androidx.cardview.widget.CardView>

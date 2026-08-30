@@ -133,6 +133,18 @@ object Download {
         }
     }
 
+    fun batchDownload(context: Context, items: List<Triple<FileUrl, String, String>>) {
+        if (items.isEmpty()) return
+        toast("Batch: ${items.size} episodes queued to 1DM+")
+        // Send each file with a small delay to avoid intent flooding (ShonenX-style)
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            for ((file, fileName, notif) in items) {
+                download(context, file, fileName, "", notif)
+                try { Thread.sleep(400) } catch (_: Exception) {}
+            }
+        }, 300)
+    }
+
     private fun adm(context: Context, file: FileUrl, fileName: String, folder: String) {
         if (isPackageInstalled("com.dv.adm", context.packageManager)) {
             val bundle = Bundle()
