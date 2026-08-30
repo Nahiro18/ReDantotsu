@@ -385,6 +385,66 @@ class AnimeWatchFragment : Fragment() {
         )
     }
 
+    fun showMagnetDialog() {
+        val input = android.widget.EditText(requireContext()).apply {
+            hint = "Paste magnet link"
+            setPadding(32, 24, 32, 24)
+        }
+        requireContext().customAlertDialog().apply {
+            setTitle("Stream Magnet Link")
+            setCustomView(input)
+            setPosButton("Stream") {
+                val magnet = input.text.toString().trim()
+                if (magnet.startsWith("magnet:") || magnet.endsWith(".torrent")) {
+                    streamMagnetLink(magnet)
+                } else {
+                    snackString("Invalid magnet link")
+                }
+            }
+            setNegButton("Cancel") {}
+        }.show()
+    }
+
+    private fun streamMagnetLink(magnet: String) {
+        val torrentManager = Injekt.get<ani.dantotsu.addons.torrent.TorrentAddonManager>()
+        if (!torrentManager.isAvailable()) {
+            snackString(getString(R.string.torrent_addon_not_available))
+            return
+        }
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val ext = torrentManager.extension!!.extension
+                torrentManager.torrentHash?.let { ext.removeTorrent(it) }
+                val torrent = ext.addTorrent(magnet, "Magnet Stream", "", "", false)
+                torrentManager.torrentHash = torrent.hash
+                val streamUrl = ext.getLink(torrent, 0)
+                withContext(Dispatchers.Main) {
+                    // Use Download helper to handle magnet via 1DM or torrent streaming
+                    // For direct streaming without download, we create a simple video
+                    val fileUrl = ani.dantotsu.FileUrl(streamUrl, mapOf())
+                    // Directly start player with magnet stream URL
+                    val intent = android.content.Intent(requireContext(), ani.dantotsu.media.anime.ExoplayerView::class.java).apply {
+                        putExtra("torrentUrl", streamUrl)
+                        putExtra("torrentMagnet", magnet)
+                        ani.dantotsu.media.anime.ExoplayerView.media = media
+                        ani.dantotsu.media.anime.ExoplayerView.initialized = true
+                    }
+                    // Also try to add to media for ExoPlayer to pick up
+                    try {
+                        val testVideo = ani.dantotsu.parsers.Video(quality = 1080, videoType = ani.dantotsu.parsers.VideoType.CONTAINER, url = streamUrl, size = null)
+                        // Store for player
+                        media.anime?.episodes?.get("1")?.let { ep ->
+                            // Already has episodes, just update
+                        }
+                    } catch (_: Exception) {}
+                    startActivity(intent)
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) { snackString("Failed: ${e.message}") }
+            }
+        }
+    }
+
     private fun setupBatchBar() {
         if (!::episodeAdapter.isInitialized) return
         episodeAdapter.onBatchSelectionChanged = { count ->

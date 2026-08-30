@@ -802,14 +802,31 @@ class MangaReaderActivity : AppCompatActivity() {
                 ani.dantotsu.settings.CurrentReaderSettings.Directions.BOTTOM_TO_TOP ||
                 defaultSettings.direction ==
                 ani.dantotsu.settings.CurrentReaderSettings.Directions.RIGHT_TO_LEFT
+        val isPaged = defaultSettings.layout == CurrentReaderSettings.Layouts.PAGED
         // px per frame (targeting ~60fps = 16ms delay). Speed 1.0 ≈ 2 px/frame.
         val pxPerFrame = (defaultSettings.autoScrollSpeed * 2f).toInt().coerceAtLeast(1)
+        // Delay for paged mode: speed 1.0 = 3s per page
+        val pagedDelayMs = ((4.0f - defaultSettings.autoScrollSpeed.coerceIn(0.5f, 4f)) * 1000L).toLong().coerceIn(800L, 6000L)
         autoScrollJob = scope.launch(Dispatchers.Main) {
+            var lastPagedScroll = System.currentTimeMillis()
             while (isActive) {
                 if (!isUserScrolling) {
-                    val dx = if (isVertical) 0 else if (isReverse) -pxPerFrame else pxPerFrame
-                    val dy = if (!isVertical) 0 else if (isReverse) -pxPerFrame else pxPerFrame
-                    binding.mangaReaderRecycler.scrollBy(dx, dy)
+                    if (isPaged) {
+                        if (System.currentTimeMillis() - lastPagedScroll >= pagedDelayMs) {
+                            val next = if (isReverse) binding.mangaReaderPager.currentItem - 1 else binding.mangaReaderPager.currentItem + 1
+                            if (next in 0 until (maxChapterPage.toInt())) {
+                                binding.mangaReaderPager.setCurrentItem(next, true)
+                            } else {
+                                stopAutoScroll()
+                                break
+                            }
+                            lastPagedScroll = System.currentTimeMillis()
+                        }
+                    } else {
+                        val dx = if (isVertical) 0 else if (isReverse) -pxPerFrame else pxPerFrame
+                        val dy = if (!isVertical) 0 else if (isReverse) -pxPerFrame else pxPerFrame
+                        binding.mangaReaderRecycler.scrollBy(dx, dy)
+                    }
                 }
                 delay(16L)
             }
