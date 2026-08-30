@@ -8,6 +8,11 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import androidx.core.content.ContextCompat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ani.dantotsu.FileUrl
 import ani.dantotsu.R
 import ani.dantotsu.currContext
@@ -136,13 +141,15 @@ object Download {
     fun batchDownload(context: Context, items: List<Triple<FileUrl, String, String>>) {
         if (items.isEmpty()) return
         toast("Batch: ${items.size} episodes queued to 1DM+")
-        // Send each file with a small delay to avoid intent flooding (ShonenX-style)
-        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+        // Use IO scope with delay to avoid flooding 1DM (ShonenX-style)
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
             for ((file, fileName, notif) in items) {
-                download(context, file, fileName, "", notif)
-                try { Thread.sleep(400) } catch (_: Exception) {}
+                withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    download(context, file, fileName, "", notif)
+                }
+                kotlinx.coroutines.delay(600)
             }
-        }, 300)
+        }
     }
 
     private fun adm(context: Context, file: FileUrl, fileName: String, folder: String) {
