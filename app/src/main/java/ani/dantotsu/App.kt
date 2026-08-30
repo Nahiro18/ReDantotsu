@@ -47,7 +47,8 @@ class App : Application() {
     private lateinit var novelExtensionManager: NovelExtensionManager
     private lateinit var lnReaderPluginManager: ani.dantotsu.parsers.novel.lnreader.LnReaderPluginManager
     private lateinit var lnReaderJsExecutor: ani.dantotsu.parsers.novel.lnreader.LnReaderJsExecutor
-    // Torrent/download managers are lazy-loaded via Injekt when needed (no startup overhead)
+    private lateinit var torrentAddonManager: TorrentAddonManager
+    private lateinit var downloadAddonManager: DownloadAddonManager
 
     init {
         instance = this
@@ -135,7 +136,7 @@ class App : Application() {
                 lnReaderJsExecutor
             )
         }
-        // Torrent/download managers are now lazy-loaded only when needed (no background work at startup)
+        applicationScope.launch {
             if (PrefManager.getVal<Int>(PrefName.CommentsEnabled) == 1) {
                 CommentsAPI.fetchAuthToken(this@App)
             }
