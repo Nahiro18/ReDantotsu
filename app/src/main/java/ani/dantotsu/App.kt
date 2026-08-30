@@ -108,19 +108,23 @@ class App : Application() {
             }
         }
 
+        // Defer extension loading to avoid competing with image loading on cold start
         applicationScope.launch {
+            kotlinx.coroutines.delay(3000)
             animeExtensionManager = Injekt.get()
             animeExtensionManager.findAvailableExtensions()
             Logger.log("Anime Extensions: ${animeExtensionManager.installedExtensionsFlow.first()}")
             AnimeSources.init(animeExtensionManager.installedExtensionsFlow)
         }
         applicationScope.launch {
+            kotlinx.coroutines.delay(3000)
             mangaExtensionManager = Injekt.get()
             mangaExtensionManager.findAvailableExtensions()
             Logger.log("Manga Extensions: ${mangaExtensionManager.installedExtensionsFlow.first()}")
             MangaSources.init(mangaExtensionManager.installedExtensionsFlow)
         }
         applicationScope.launch {
+            kotlinx.coroutines.delay(3000)
             novelExtensionManager = Injekt.get()
             lnReaderPluginManager = Injekt.get()
             lnReaderJsExecutor = Injekt.get()
