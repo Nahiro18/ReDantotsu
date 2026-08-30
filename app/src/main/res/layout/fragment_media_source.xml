@@ -66,7 +66,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:layout_margin="16dp"
-        android:layout_marginBottom="80dp"
+        android:layout_marginBottom="100dp"
         android:visibility="gone"
         app:cardBackgroundColor="?attr/colorPrimary"
         app:cardCornerRadius="16dp"
