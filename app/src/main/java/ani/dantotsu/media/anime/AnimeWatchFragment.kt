@@ -468,17 +468,24 @@ class AnimeWatchFragment : Fragment() {
                 val items = mutableListOf<Triple<ani.dantotsu.FileUrl, String, String>>()
                 for (epNum in selected) {
                     try {
-                        val ep = media.anime?.episodes?.get(epNum) ?: continue
-                        // Get video URL via the same path as single download: use the episode's extractor
-                        // We need to fetch the video - reuse the download logic but for 1DM
-                        // For now, use the episode's thumb URL as fallback and let Download handle it
-                        // Actually we need to resolve the video via the parser
-                        val parser = model.watchSources?.get(media.selected?.sourceIndex ?: 0)
-                        // This is a simplified batch - we will use the episode's number to fetch via Download batch
-                        // The Download.batchDownload will be called with the FileUrl from the episode's video
-                        // For now, we collect the episode's video if available
+                        var ep = media.anime?.episodes?.get(epNum) ?: continue
+                        // If videos not loaded (user hasn't played), fetch them like single download does
+                        if (ep.extractors.isNullOrEmpty()) {
+                            try {
+                                val idx = media.selected?.sourceIndex ?: 0
+                                model.loadEpisodeSingleVideo(ep, media.selected!!)
+                                // Reload ep after fetch (ep object is updated in place via extractorCallback)
+                                ep = media.anime?.episodes?.get(epNum) ?: ep
+                                // Small delay for extractor callback to populate
+                                kotlinx.coroutines.delay(800)
+                            } catch (_: Exception) {}
+                        }
                         val extractor = ep.extractors?.find { it.server.name == ep.selectedExtractor }
-                        val video = if (extractor != null && extractor.videos.isNotEmpty() && ep.selectedVideo < extractor.videos.size) extractor.videos[ep.selectedVideo] else null
+                            ?: ep.extractors?.firstOrNull()
+                        val video = if (extractor != null && extractor.videos.isNotEmpty()) {
+                            val idx = ep.selectedVideo.coerceIn(0, extractor.videos.size - 1)
+                            extractor.videos[idx]
+                        } else null
                         if (video != null) {
                             val regex = "[\\\\/:*?\"<>|]".toRegex()
                             val aTitle = media.mainName().replace(regex, "")

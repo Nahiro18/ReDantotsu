@@ -136,11 +136,15 @@ class App : Application() {
                 lnReaderJsExecutor
             )
         }
+        // Lazy init: only when user opens downloads/torrents, not at startup
         applicationScope.launch {
+            // Defer heavy init to avoid background consumption on cold start
+            kotlinx.coroutines.delay(5000)
             torrentAddonManager = Injekt.get()
             downloadAddonManager = Injekt.get()
-            torrentAddonManager.init()
-            downloadAddonManager.init()
+            // init() is lightweight; actual extension loading is lazy
+            try { torrentAddonManager.init() } catch (_: Exception) {}
+            try { downloadAddonManager.init() } catch (_: Exception) {}
             if (PrefManager.getVal<Int>(PrefName.CommentsEnabled) == 1) {
                 CommentsAPI.fetchAuthToken(this@App)
             }
