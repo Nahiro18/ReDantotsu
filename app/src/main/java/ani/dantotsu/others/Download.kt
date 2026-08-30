@@ -154,15 +154,47 @@ object Download {
 
     fun batchDownload(context: Context, items: List<Triple<FileUrl, String, String>>) {
         if (items.isEmpty()) return
-        toast("Batch: ${items.size} episodes queued to 1DM+")
-        // Use IO scope with delay to avoid flooding 1DM (ShonenX-style)
+        toast("Batch: ${items.size} episodes queued")
+        // For 1DM batch, use longer delay and ensure each intent is distinct (ShonenX-style)
         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-            for ((file, fileName, notif) in items) {
+            for ((index, triple) in items.withIndex()) {
+                val (file, fileName, notif) = triple
                 withContext(kotlinx.coroutines.Dispatchers.Main) {
-                    download(context, file, fileName, "", notif)
+                    // Use a unique request code per item to avoid intent merging
+                    downloadBatchItem(context, file, notif ?: fileName, index)
                 }
-                kotlinx.coroutines.delay(600)
+                kotlinx.coroutines.delay(1200)
             }
+        }
+    }
+
+    private fun downloadBatchItem(context: Context, file: FileUrl, notif: String, index: Int) {
+        // Direct 1DM call with unique extra to prevent intent deduping
+        val appName = when {
+            isPackageInstalled("idm.internet.download.manager.plus", context.packageManager) -> "idm.internet.download.manager.plus"
+            isPackageInstalled("idm.internet.download.manager", context.packageManager) -> "idm.internet.download.manager"
+            isPackageInstalled("idm.internet.download.manager.adm.lite", context.packageManager) -> "idm.internet.download.manager.adm.lite"
+            else -> ""
+        }
+        if (appName.isNotEmpty()) {
+            val bundle = Bundle()
+            defaultHeaders.forEach { a -> bundle.putString(a.key, a.value) }
+            file.headers.forEach { a -> bundle.putString(a.key, a.value) }
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                component = ComponentName(appName, "idm.internet.download.manager.Downloader")
+                data = Uri.parse(file.url)
+                putExtra("extra_headers", bundle)
+                putExtra("extra_filename", notif)
+                putExtra("extra_batch_id", index) // Unique to prevent deduping
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+            }
+            try {
+                ContextCompat.startActivity(context, intent, null)
+            } catch (_: Exception) {
+                download(context, file, notif, "", notif)
+            }
+        } else {
+            download(context, file, notif, "", notif)
         }
     }
 
