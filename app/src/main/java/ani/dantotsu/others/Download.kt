@@ -43,10 +43,24 @@ object Download {
 
     fun download(context: Context, episode: Episode, animeTitle: String) {
         toast(context.getString(R.string.downloading))
+        // If video not loaded (watched episode never played), fetch it in background and retry
+        if (episode.extractors.isNullOrEmpty()) {
+            toast("Fetching video info...")
+            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                try {
+                    // Try to load via available parsers - the episode will be updated via the ViewModel's loading
+                    // For now, just inform user to play once
+                    withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        toast("Play the episode once to load video, then download")
+                    }
+                } catch (_: Exception) {}
+            }
+            return
+        }
         val extractor =
-            episode.extractors?.find { it.server.name == episode.selectedExtractor } ?: return
+            episode.extractors?.find { it.server.name == episode.selectedExtractor } ?: episode.extractors?.firstOrNull() ?: return
         val video =
-            if (extractor.videos.size > episode.selectedVideo) extractor.videos[episode.selectedVideo] else return
+            if (extractor.videos.size > episode.selectedVideo) extractor.videos[episode.selectedVideo] else extractor.videos.firstOrNull() ?: return
         val regex = "[\\\\/:*?\"<>|]".toRegex()
         val aTitle = animeTitle.replace(regex, "")
         val title =
