@@ -55,7 +55,7 @@ class App : Application() {
     }
 
     val mFTActivityLifecycleCallbacks = FTActivityLifecycleCallbacks()
-    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate() {
         super.onCreate()
