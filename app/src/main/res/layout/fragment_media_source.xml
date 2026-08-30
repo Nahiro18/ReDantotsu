@@ -68,7 +68,7 @@
         android:layout_margin="16dp"
         android:layout_marginTop="16dp"
         android:visibility="gone"
-        app:cardBackgroundColor="?attr/colorPrimary"
+        app:cardBackgroundColor="?android:colorBackground"
         app:cardCornerRadius="16dp"
         app:cardElevation="8dp">
 
@@ -86,7 +86,7 @@
                 android:layout_weight="1"
                 android:fontFamily="@font/poppins_bold"
                 android:text="0 selected"
-                android:textColor="@android:color/white"
+                android:textColor="?attr/colorOnBackground"
                 android:textSize="14sp" />
 
             <TextView
@@ -100,7 +100,7 @@
                 android:fontFamily="@font/poppins_bold"
                 android:padding="8dp"
                 android:text="Select All"
-                android:textColor="@android:color/white"
+                android:textColor="?attr/colorOnBackground"
                 android:textSize="12sp" />
 
             <TextView
@@ -113,7 +113,7 @@
                 android:fontFamily="@font/poppins_bold"
                 android:padding="8dp"
                 android:text="Download via 1DM"
-                android:textColor="@android:color/white"
+                android:textColor="?attr/colorOnBackground"
                 android:textSize="12sp" />
 
             <TextView
@@ -127,7 +127,7 @@
                 android:fontFamily="@font/poppins_bold"
                 android:padding="8dp"
                 android:text="Cancel"
-                android:textColor="@android:color/white"
+                android:textColor="?attr/colorOnBackground"
                 android:textSize="12sp" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>

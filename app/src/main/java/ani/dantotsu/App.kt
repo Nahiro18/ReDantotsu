@@ -47,8 +47,7 @@ class App : Application() {
     private lateinit var novelExtensionManager: NovelExtensionManager
     private lateinit var lnReaderPluginManager: ani.dantotsu.parsers.novel.lnreader.LnReaderPluginManager
     private lateinit var lnReaderJsExecutor: ani.dantotsu.parsers.novel.lnreader.LnReaderJsExecutor
-    private lateinit var torrentAddonManager: TorrentAddonManager
-    private lateinit var downloadAddonManager: DownloadAddonManager
+    // Torrent/download managers are lazy-loaded via Injekt when needed (no startup overhead)
 
     init {
         instance = this
@@ -136,15 +135,7 @@ class App : Application() {
                 lnReaderJsExecutor
             )
         }
-        // Lazy init: only when user opens downloads/torrents, not at startup
-        applicationScope.launch {
-            // Defer heavy init to avoid background consumption on cold start
-            kotlinx.coroutines.delay(5000)
-            torrentAddonManager = Injekt.get()
-            downloadAddonManager = Injekt.get()
-            // init() is lightweight; actual extension loading is lazy
-            try { torrentAddonManager.init() } catch (_: Exception) {}
-            try { downloadAddonManager.init() } catch (_: Exception) {}
+        // Torrent/download managers are now lazy-loaded only when needed (no background work at startup)
             if (PrefManager.getVal<Int>(PrefName.CommentsEnabled) == 1) {
                 CommentsAPI.fetchAuthToken(this@App)
             }
