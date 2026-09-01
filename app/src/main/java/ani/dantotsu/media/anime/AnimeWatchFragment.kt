@@ -466,18 +466,24 @@ class AnimeWatchFragment : Fragment() {
             // Collect download info for each selected episode and send to 1DM via Download.batchDownload
             lifecycleScope.launch(Dispatchers.IO) {
                 val items = mutableListOf<Triple<ani.dantotsu.FileUrl, String, String>>()
+                val sourceIndex = media.selected?.sourceIndex ?: 0
+                // Ensure episode list is loaded for the selected source (no need to play first)
+                try {
+                    model.loadEpisodes(media, sourceIndex, true)
+                } catch (_: Exception) {}
+                val regex = "[\\\\/:*?\"<>|]".toRegex()
+                val aTitle = media.mainName().replace(regex, "")
                 for (epNum in selected) {
                     try {
                         var ep = media.anime?.episodes?.get(epNum) ?: continue
-                        // If videos not loaded (user hasn't played), fetch them like single download does
+                        // If videos not loaded, load all servers and pick the first with video (no need to play first)
                         if (ep.extractors.isNullOrEmpty()) {
                             try {
-                                val idx = media.selected?.sourceIndex ?: 0
-                                model.loadEpisodeSingleVideo(ep, media.selected!!)
-                                // Reload ep after fetch (ep object is updated in place via extractorCallback)
+                                // loadEpisodeVideos loads ALL video servers for the episode and picks the first one with videos
+                                model.loadEpisodeVideos(ep, sourceIndex, false)
+                                // Refresh reference after fetch (extractorCallback populates list)
                                 ep = media.anime?.episodes?.get(epNum) ?: ep
-                                // Small delay for extractor callback to populate
-                                kotlinx.coroutines.delay(800)
+                                kotlinx.coroutines.delay(1200)
                             } catch (_: Exception) {}
                         }
                         val extractor = ep.extractors?.find { it.server.name == ep.selectedExtractor }
@@ -487,8 +493,6 @@ class AnimeWatchFragment : Fragment() {
                             extractor.videos[idx]
                         } else null
                         if (video != null) {
-                            val regex = "[\\\\/:*?\"<>|]".toRegex()
-                            val aTitle = media.mainName().replace(regex, "")
                             val title = "Episode ${ep.number}${if (ep.title != null) " - ${ep.title}" else ""}".replace(regex, "")
                             val fileName = "$title${if (video.size != null) "(${video.size}p)" else ""}.mp4"
                             val notif = "$title : $aTitle"

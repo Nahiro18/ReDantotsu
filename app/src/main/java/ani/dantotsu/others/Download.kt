@@ -154,26 +154,55 @@ object Download {
 
     fun batchDownload(context: Context, items: List<Triple<FileUrl, String, String>>) {
         if (items.isEmpty()) return
-        // For batch of 2+, 1DM's single-intent Downloader is singleTop -> second replaces first.
-        // Use the app's internal downloader for batch (reliable queue), 1DM for single.
+        // For batch of 2+, 1DM's Downloader activity is singleTask/singleTop.
+        // Use ACTION_SEND_MULTIPLE with all URLs in ONE intent so 1DM queues them atomically.
+        // Fallback: multiple intents each in its own task (NEW_DOCUMENT|MULTIPLE_TASK) with delay.
         val dm = PrefManager.getVal(PrefName.DownloadManager) as Int
         if (items.size == 1 || dm == 0) {
             for ((file, fileName, notif) in items) download(context, file, fileName, "", notif)
             return
         }
-        // Batch + external manager (1DM/ADM): use internal queue to guarantee all files
-        // Fallback: enqueue via internal AnimeDownloaderService if available, otherwise sequential with longer delay
-        toast("Batch: ${items.size} episodes — using internal downloader for batch")
-        // Try internal downloader path: not enough info here for AnimeDownloadTask, so fallback to sequential 1DM with 2.5s delay and NEW_TASK|CLEAR_TOP
+        toast("Batch: ${items.size} episodes queued")
         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-            for ((file, fileName, notif) in items) {
-                withContext(kotlinx.coroutines.Dispatchers.Main) {
-                    val ok = tryOneDMNewTask(context, file, notif)
-                    if (!ok) download(context, file, fileName, "", notif)
+            // Try the multi-URL path first (1DM supports ACTION_SEND_MULTIPLE with EXTRA_STREAM)
+            val sent = withContext(kotlinx.coroutines.Dispatchers.Main) {
+                tryBatchOneDMMulti(context, items)
+            }
+            if (!sent) {
+                // Fallback: sequential intents, each in its own task so they don't replace each other
+                for ((file, fileName, notif) in items) {
+                    withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        val ok = tryOneDMNewTask(context, file, notif)
+                        if (!ok) download(context, file, fileName, "", notif)
+                    }
+                    kotlinx.coroutines.delay(2500)
                 }
-                kotlinx.coroutines.delay(2500)
             }
         }
+    }
+
+    private fun tryBatchOneDMMulti(
+        context: Context,
+        items: List<Triple<FileUrl, String, String>>
+    ): Boolean {
+        val appName = when {
+            isPackageInstalled("idm.internet.download.manager.plus", context.packageManager) -> "idm.internet.download.manager.plus"
+            isPackageInstalled("idm.internet.download.manager", context.packageManager) -> "idm.internet.download.manager"
+            isPackageInstalled("idm.internet.download.manager.adm.lite", context.packageManager) -> "idm.internet.download.manager.adm.lite"
+            else -> return false
+        }
+        return try {
+            val uris = ArrayList<Uri>(items.size)
+            items.forEach { uris.add(Uri.parse(it.first.url)) }
+            val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+                type = "*/*"
+                component = ComponentName(appName, "idm.internet.download.manager.Downloader")
+                putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            ContextCompat.startActivity(context, intent, null)
+            true
+        } catch (_: Exception) { false }
     }
 
     private fun tryOneDMNewTask(context: Context, file: FileUrl, notif: String): Boolean {
@@ -192,8 +221,12 @@ object Download {
                 data = Uri.parse(file.url)
                 putExtra("extra_headers", bundle)
                 putExtra("extra_filename", notif)
+                // Each intent must create its OWN task instance, otherwise 1DM's singleTask
+                // activity receives the second intent and queues it AFTER current finishes.
+                // NEW_DOCUMENT + MULTIPLE_TASK forces a fresh task root per Intent.
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
+                addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
             }
             ContextCompat.startActivity(context, intent, null)
             true
