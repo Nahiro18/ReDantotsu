@@ -79,6 +79,8 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
     private var selected: String? = null
     private var launch: Boolean? = null
     private var isDownloadMenu: Boolean? = null
+    // Called once a download is confirmed so a caller can advance to the next episode in a batch.
+    var onBatchEpisodeDownloaded: ((String) -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -480,6 +482,12 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
                         media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]!!,
                         media!!.userPreferredName
                     )
+                    onBatchEpisodeDownloaded?.invoke(
+                        media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]!!.number
+                    )
+                    if (onBatchEpisodeDownloaded != null) {
+                        dismiss()
+                    }
                 } else {
                     val downloadAddonManager: DownloadAddonManager = Injekt.get()
                     if (!downloadAddonManager.isAvailable()) {

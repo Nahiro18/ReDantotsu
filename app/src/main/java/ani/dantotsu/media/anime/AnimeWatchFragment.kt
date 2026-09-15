@@ -23,7 +23,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.util.UnstableApi
-import kotlinx.coroutines.withContext
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -398,71 +397,41 @@ class AnimeWatchFragment : Fragment() {
             binding.batchBar.isVisible = false
         }
         binding.batchDownload.setOnClickListener {
-            val selected = episodeAdapter.selectedForBatch.toList()
+            val selected = episodeAdapter.selectedForBatch.sorted().toMutableList()
             if (selected.isEmpty()) {
                 snackString("No episodes selected")
                 return@setOnClickListener
             }
-            // Collect download info for each selected episode and send to 1DM via Download.batchDownload
-            lifecycleScope.launch(Dispatchers.IO) {
-                val items = mutableListOf<Triple<ani.dantotsu.FileUrl, String, String>>()
-                val sourceIndex = media.selected?.sourceIndex ?: 0
-                val regex = "[\\\\/:*?\"<>|]".toRegex()
-                val aTitle = media.mainName().replace(regex, "")
-                // Only reload episode list if a selected key is missing (avoid race that skips first episode)
-                val needsReload = selected.any { media.anime?.episodes?.get(it) == null }
-                if (needsReload) {
-                    try {
-                        model.loadEpisodes(media, sourceIndex, true)
-                        kotlinx.coroutines.delay(800)
-                    } catch (_: Exception) {}
+            // Walk through each selected episode showing the download selector (server picker)
+            // one at a time. When a download is confirmed for one, advance to the next. 1DM is
+            // invoked on each confirmation (via Download.download inside the selector).
+            fun openNextBatchDownloader() {
+                if (selected.isEmpty()) {
+                    episodeAdapter.exitBatchMode()
+                    binding.batchBar.isVisible = false
+                    return
                 }
-                for (epNum in selected) {
-                    try {
-                        var ep = media.anime?.episodes?.get(epNum) ?: continue
-                        // If videos not loaded, load them without playing first.
-                        // Prefer the single selected server (mirrors the working individual
-                        // download path) then fall back to all servers.
-                        if (ep.extractors.isNullOrEmpty()) {
-                            try {
-                                val selectedData = model.loadSelected(media)
-                                if (selectedData.server != null) {
-                                    model.loadEpisodeSingleVideo(ep, selectedData)
-                                } else {
-                                    model.loadEpisodeVideos(ep, sourceIndex, false, force = true)
-                                }
-                                var waited = 0
-                                while (ep.extractors.isNullOrEmpty() && waited < 8000) {
-                                    kotlinx.coroutines.delay(200)
-                                    waited += 200
-                                    ep = media.anime?.episodes?.get(epNum) ?: ep
-                                }
-                            } catch (_: Exception) {}
-                        }
-                        val extractor = ep.extractors?.find { it.server.name == ep.selectedExtractor }
-                            ?: ep.extractors?.firstOrNull()
-                        val video = if (extractor != null && extractor.videos.isNotEmpty()) {
-                            val idx = ep.selectedVideo.coerceIn(0, extractor.videos.size - 1)
-                            extractor.videos[idx]
-                        } else null
-                        if (video != null) {
-                            val title = "Episode ${ep.number}${if (ep.title != null) " - ${ep.title}" else ""}".replace(regex, "")
-                            val fileName = "$title${if (video.size != null) "(${video.size}p)" else ""}.mp4"
-                            val notif = "$title : $aTitle"
-                            items.add(Triple(video.file, fileName, notif))
-                        }
-                    } catch (_: Exception) {}
+                val epNum = selected.removeAt(0)
+                val ep = media.anime?.episodes?.get(epNum)
+                if (ep == null) {
+                    snackString("Episode $epNum not found")
+                    openNextBatchDownloader()
+                    return
                 }
-                withContext(Dispatchers.Main) {
-                    if (items.isEmpty()) {
-                        snackString("No downloadable episodes found. Play an episode first to load videos.")
-                    } else {
-                        ani.dantotsu.others.Download.batchDownload(requireContext(), items)
-                        episodeAdapter.exitBatchMode()
-                        binding.batchBar.isVisible = false
-                    }
+                media.anime?.selectedEpisode = epNum
+                val manager = requireActivity().supportFragmentManager
+                if (manager.findFragmentByTag("dialog") == null && !manager.isDestroyed) {
+                    val selector = SelectorDialogFragment.newInstance(
+                        media.selected?.server,
+                        false,
+                        null,
+                        isDownload = true
+                    )
+                    selector.onBatchEpisodeDownloaded = { openNextBatchDownloader() }
+                    selector.show(manager, "dialog")
                 }
             }
+            openNextBatchDownloader()
         }
     }
 
