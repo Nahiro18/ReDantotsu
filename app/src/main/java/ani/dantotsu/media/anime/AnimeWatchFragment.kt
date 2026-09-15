@@ -420,10 +420,17 @@ class AnimeWatchFragment : Fragment() {
                 for (epNum in selected) {
                     try {
                         var ep = media.anime?.episodes?.get(epNum) ?: continue
-                        // If videos not loaded, load all servers and pick the first with video (no need to play first)
+                        // If videos not loaded, load them without playing first.
+                        // Prefer the single selected server (mirrors the working individual
+                        // download path) then fall back to all servers.
                         if (ep.extractors.isNullOrEmpty()) {
                             try {
-                                model.loadEpisodeVideos(ep, sourceIndex, false, force = true)
+                                val selectedData = model.loadSelected(media)
+                                if (selectedData.server != null) {
+                                    model.loadEpisodeSingleVideo(ep, selectedData)
+                                } else {
+                                    model.loadEpisodeVideos(ep, sourceIndex, false, force = true)
+                                }
                                 var waited = 0
                                 while (ep.extractors.isNullOrEmpty() && waited < 8000) {
                                     kotlinx.coroutines.delay(200)
