@@ -423,9 +423,9 @@ class AnimeWatchFragment : Fragment() {
                         // If videos not loaded, load all servers and pick the first with video (no need to play first)
                         if (ep.extractors.isNullOrEmpty()) {
                             try {
-                                model.loadEpisodeVideos(ep, sourceIndex, false)
+                                model.loadEpisodeVideos(ep, sourceIndex, false, force = true)
                                 var waited = 0
-                                while (ep.extractors.isNullOrEmpty() && waited < 5000) {
+                                while (ep.extractors.isNullOrEmpty() && waited < 8000) {
                                     kotlinx.coroutines.delay(200)
                                     waited += 200
                                     ep = media.anime?.episodes?.get(epNum) ?: ep

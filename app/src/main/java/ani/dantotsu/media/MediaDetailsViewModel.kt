@@ -153,13 +153,13 @@ class MediaDetailsViewModel : ViewModel() {
     private var episode = MutableLiveData<Episode?>(null)
     fun getEpisode(): LiveData<Episode?> = episode
 
-    suspend fun loadEpisodeVideos(ep: Episode, i: Int, post: Boolean = true) {
+    suspend fun loadEpisodeVideos(ep: Episode, i: Int, post: Boolean = true, force: Boolean = false) {
         val link = ep.link ?: return
         if (!ep.allStreams || ep.extractors.isNullOrEmpty()) {
             val list = mutableListOf<VideoExtractor>()
             ep.extractors = list
             watchSources?.get(i)?.apply {
-                if (!post && !allowsPreloading) return@apply
+                if (!post && !force && !allowsPreloading) return@apply
                 ep.sEpisode?.let {
                     loadByVideoServers(link, ep.extra, it) { extractor ->
                         if (extractor.videos.isNotEmpty()) {

@@ -174,53 +174,18 @@ object Download {
         }
         toast("Batch: ${items.size} episodes queued")
         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-            // Official 1DM batch API: ONE intent with url_list + url_list.filename.
-            // Sequential intents get replaced by 1DM's Downloader editor (only last survives).
-            val sent = withContext(kotlinx.coroutines.Dispatchers.Main) {
-                tryOneDMBatch(context, items)
-            }
-            if (!sent) {
-                for ((file, fileName, notif) in items) {
-                    withContext(kotlinx.coroutines.Dispatchers.Main) {
-                        val ok = tryOneDMNewTask(context, file, notif)
-                        if (!ok) download(context, file, fileName, "", notif)
-                    }
-                    kotlinx.coroutines.delay(2500)
+            // 1DM batch: send one intent per episode, each in its OWN task instance
+            // (NEW_DOCUMENT|MULTIPLE_TASK) so they queue instead of replacing each other.
+            // This works on all 1DM versions (url_list batch API requires v157+ and is
+            // silently ignored on older builds).
+            for ((file, fileName, notif) in items) {
+                withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    val ok = tryOneDMNewTask(context, file, notif)
+                    if (!ok) download(context, file, fileName, "", notif)
                 }
+                kotlinx.coroutines.delay(1800)
             }
         }
-    }
-
-    private fun tryOneDMBatch(context: Context, items: List<Triple<FileUrl, String, String>>): Boolean {
-        val appName = when {
-            isPackageInstalled("idm.internet.download.manager.plus", context.packageManager) -> "idm.internet.download.manager.plus"
-            isPackageInstalled("idm.internet.download.manager", context.packageManager) -> "idm.internet.download.manager"
-            isPackageInstalled("idm.internet.download.manager.adm.lite", context.packageManager) -> "idm.internet.download.manager.adm.lite"
-            else -> return false
-        }
-        return try {
-            val urls = ArrayList<String>(items.size)
-            val names = ArrayList<String>(items.size)
-            items.forEach { (file, _, notif) ->
-                urls.add(file.url)
-                names.add(notif)
-            }
-            val bundle = Bundle()
-            defaultHeaders.forEach { a -> bundle.putString(a.key, a.value) }
-            items.firstOrNull()?.first?.headers?.forEach { a -> bundle.putString(a.key, a.value) }
-            // Official 1DM multiple-files API (v157+): url_list + url_list.filename String arrays.
-            // Data must be a valid url (it is ignored, first url is used).
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                component = ComponentName(appName, "idm.internet.download.manager.Downloader")
-                data = Uri.parse(urls[0])
-                putExtra("extra_headers", bundle)
-                putStringArrayListExtra("url_list", urls)
-                putStringArrayListExtra("url_list.filename", names)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            ContextCompat.startActivity(context, intent, null)
-            true
-        } catch (_: Exception) { false }
     }
 
     private fun tryOneDMNewTask(context: Context, file: FileUrl, notif: String): Boolean {
