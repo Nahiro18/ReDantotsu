@@ -154,6 +154,15 @@ class App : Application() {
                 Logger.log(e)
             }
         }
+        // Initialize addon managers so installed download/torrent addons are detected
+        // and their install/update/uninstall listeners are registered at startup.
+        applicationScope.launch {
+            kotlinx.coroutines.delay(3000)
+            downloadAddonManager = Injekt.get()
+            downloadAddonManager.init()
+            torrentAddonManager = Injekt.get()
+            torrentAddonManager.init()
+        }
     }
 
     private fun setupNotificationChannels() {
