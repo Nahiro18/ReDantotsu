@@ -482,11 +482,16 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
                         media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]!!,
                         media!!.userPreferredName
                     )
-                    onBatchEpisodeDownloaded?.invoke(
-                        media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]!!.number
-                    )
-                    if (onBatchEpisodeDownloaded != null) {
+                    val onConfirmed = onBatchEpisodeDownloaded
+                    if (onConfirmed != null) {
+                        // Dismiss first so the current selector is removed, then open the next
+                        // episode's selector once the transaction completes.
                         dismiss()
+                        val epNum =
+                            media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]!!.number
+                        itemView.post {
+                            onConfirmed(epNum)
+                        }
                     }
                 } else {
                     val downloadAddonManager: DownloadAddonManager = Injekt.get()

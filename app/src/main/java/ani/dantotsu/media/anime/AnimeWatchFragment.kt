@@ -420,16 +420,16 @@ class AnimeWatchFragment : Fragment() {
                 }
                 media.anime?.selectedEpisode = epNum
                 val manager = requireActivity().supportFragmentManager
-                if (manager.findFragmentByTag("dialog") == null && !manager.isDestroyed) {
-                    val selector = SelectorDialogFragment.newInstance(
-                        media.selected?.server,
-                        false,
-                        null,
-                        isDownload = true
-                    )
-                    selector.onBatchEpisodeDownloaded = { openNextBatchDownloader() }
-                    selector.show(manager, "dialog")
-                }
+                // The previous selector is still present while it dismisses (async), so don't
+                // gate on findFragmentByTag: the new show simply replaces the old one.
+                val selector = SelectorDialogFragment.newInstance(
+                    media.selected?.server,
+                    false,
+                    null,
+                    isDownload = true
+                )
+                selector.onBatchEpisodeDownloaded = { openNextBatchDownloader() }
+                selector.show(manager, "dialog")
             }
             openNextBatchDownloader()
         }
