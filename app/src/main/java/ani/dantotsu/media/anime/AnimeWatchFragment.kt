@@ -95,6 +95,11 @@ class AnimeWatchFragment : Fragment() {
 
     var screenWidth = 0f
     private var progress = View.VISIBLE
+    // Batch download queue: remaining episodes to show their download selector one by one.
+    // Opened on onResume (after returning from 1DM) because showing a fragment while the app
+    // is in the background silently fails.
+    private var batchQueue: MutableList<String>? = null
+    private var advanceBatchOnResume = false
 
     var continueEp: Boolean = false
     var loaded = false
@@ -402,37 +407,42 @@ class AnimeWatchFragment : Fragment() {
                 snackString("No episodes selected")
                 return@setOnClickListener
             }
-            // Walk through each selected episode showing the download selector (server picker)
-            // one at a time. When a download is confirmed for one, advance to the next. 1DM is
-            // invoked on each confirmation (via Download.download inside the selector).
-            fun openNextBatchDownloader() {
-                if (selected.isEmpty()) {
-                    episodeAdapter.exitBatchMode()
-                    binding.batchBar.isVisible = false
-                    return
-                }
-                val epNum = selected.removeAt(0)
-                val ep = media.anime?.episodes?.get(epNum)
-                if (ep == null) {
-                    snackString("Episode $epNum not found")
-                    openNextBatchDownloader()
-                    return
-                }
-                media.anime?.selectedEpisode = epNum
-                val manager = requireActivity().supportFragmentManager
-                // The previous selector is still present while it dismisses (async), so don't
-                // gate on findFragmentByTag: the new show simply replaces the old one.
-                val selector = SelectorDialogFragment.newInstance(
-                    media.selected?.server,
-                    false,
-                    null,
-                    isDownload = true
-                )
-                selector.onBatchEpisodeDownloaded = { openNextBatchDownloader() }
-                selector.show(manager, "dialog")
-            }
+            batchQueue = selected
+            advanceBatchOnResume = false
             openNextBatchDownloader()
         }
+    }
+
+    /**
+     * Opens the download selector (server picker) for the next episode in the batch queue.
+     * Called from onResume after returning from 1DM so the fragment is in the foreground;
+     * showing a BottomSheetDialogFragment while the app is backgrounded is silently dropped.
+     */
+    private fun openNextBatchDownloader() {
+        val queue = batchQueue ?: return
+        if (queue.isEmpty()) {
+            batchQueue = null
+            episodeAdapter.exitBatchMode()
+            binding.batchBar.isVisible = false
+            return
+        }
+        val epNum = queue.removeAt(0)
+        val ep = media.anime?.episodes?.get(epNum)
+        if (ep == null) {
+            snackString("Episode $epNum not found")
+            openNextBatchDownloader()
+            return
+        }
+        media.anime?.selectedEpisode = epNum
+        val manager = requireActivity().supportFragmentManager
+        val selector = SelectorDialogFragment.newInstance(
+            media.selected?.server,
+            false,
+            null,
+            isDownload = true
+        )
+        selector.onBatchEpisodeDownloaded = { advanceBatchOnResume = true }
+        selector.show(manager, "dialog")
     }
 
     fun openSettings(pkg: AnimeExtension.Installed) {
@@ -740,6 +750,16 @@ class AnimeWatchFragment : Fragment() {
         binding.mediaSourceRecycler.layoutManager?.onRestoreInstanceState(state)
 
         requireActivity().setNavigationTheme()
+
+        // Returning from 1DM after confirming a batch download: open the next episode's selector.
+        if (advanceBatchOnResume) {
+            advanceBatchOnResume = false
+            if (batchQueue != null) {
+                binding.root.post {
+                    openNextBatchDownloader()
+                }
+            }
+        }
     }
 
     override fun onPause() {
