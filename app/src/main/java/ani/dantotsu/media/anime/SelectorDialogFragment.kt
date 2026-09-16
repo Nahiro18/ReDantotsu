@@ -489,7 +489,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
                         dismiss()
                         val epNum =
                             media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]!!.number
-                        itemView.post {
+                        binding.root.post {
                             onConfirmed(epNum)
                         }
                     }
