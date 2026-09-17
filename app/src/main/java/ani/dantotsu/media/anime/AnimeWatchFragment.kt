@@ -99,7 +99,6 @@ class AnimeWatchFragment : Fragment() {
     // Opened on onResume (after returning from 1DM) because showing a fragment while the app
     // is in the background silently fails.
     private var batchQueue: MutableList<String>? = null
-    private var advanceBatchOnResume = false
 
     var continueEp: Boolean = false
     var loaded = false
@@ -408,7 +407,6 @@ class AnimeWatchFragment : Fragment() {
                 return@setOnClickListener
             }
             batchQueue = selected
-            advanceBatchOnResume = false
             openNextBatchDownloader()
         }
     }
@@ -441,7 +439,7 @@ class AnimeWatchFragment : Fragment() {
             null,
             isDownload = true
         )
-        selector.onBatchEpisodeDownloaded = { advanceBatchOnResume = true }
+        selector.onBatchEpisodeDownloaded = { openNextBatchDownloader() }
         selector.show(manager, "dialog")
     }
 
@@ -750,16 +748,6 @@ class AnimeWatchFragment : Fragment() {
         binding.mediaSourceRecycler.layoutManager?.onRestoreInstanceState(state)
 
         requireActivity().setNavigationTheme()
-
-        // Returning from 1DM after confirming a batch download: open the next episode's selector.
-        if (advanceBatchOnResume) {
-            advanceBatchOnResume = false
-            if (batchQueue != null) {
-                binding.root.post {
-                    openNextBatchDownloader()
-                }
-            }
-        }
     }
 
     override fun onPause() {

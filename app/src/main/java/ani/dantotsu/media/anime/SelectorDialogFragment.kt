@@ -81,6 +81,11 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
     private var isDownloadMenu: Boolean? = null
     // Called once a download is confirmed so a caller can advance to the next episode in a batch.
     var onBatchEpisodeDownloaded: ((String) -> Unit)? = null
+    // Set when a batch download is confirmed; used in onDismiss to advance to the next episode
+    // (onDismiss fires after this bottom sheet closes, unlike onResume which never runs because
+    // 1DM shows an overlay instead of pausing this activity).
+    private var batchConfirmPending = false
+    private var batchConfirmEpisode: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -482,17 +487,14 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
                         media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]!!,
                         media!!.userPreferredName
                     )
-                    val onConfirmed = onBatchEpisodeDownloaded
-                    if (onConfirmed != null) {
-                        // Dismiss first so the current selector is removed, then open the next
-                        // episode's selector once the transaction completes.
-                        dismiss()
-                        val epNum =
+                    if (onBatchEpisodeDownloaded != null) {
+                        // Remember we're advancing and let onDismiss open the next selector
+                        // (onDismiss fires once this sheet has fully closed).
+                        batchConfirmPending = true
+                        batchConfirmEpisode =
                             media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]!!.number
-                        binding.root.post {
-                            onConfirmed(epNum)
-                        }
                     }
+                    dismiss()
                 } else {
                     val downloadAddonManager: DownloadAddonManager = Injekt.get()
                     if (!downloadAddonManager.isAvailable()) {
@@ -730,6 +732,20 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
     override fun onSaveInstanceState(outState: Bundle) {}
 
     override fun onDismiss(dialog: DialogInterface) {
+        if (batchConfirmPending) {
+            batchConfirmPending = false
+            val epNum = batchConfirmEpisode
+            val onConfirmed = onBatchEpisodeDownloaded
+            if (epNum != null && onConfirmed != null) {
+                // Advance to the next episode's selector after this sheet has fully closed.
+                val v = view
+                if (v != null) {
+                    v.post {
+                        onConfirmed(epNum)
+                    }
+                }
+            }
+        }
         if (launch == false) {
             activity?.hideSystemBars()
             model.epChanged.postValue(true)
