@@ -9,6 +9,8 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -81,11 +83,6 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
     private var isDownloadMenu: Boolean? = null
     // Called once a download is confirmed so a caller can advance to the next episode in a batch.
     var onBatchEpisodeDownloaded: ((String) -> Unit)? = null
-    // Set when a batch download is confirmed; used in onDismiss to advance to the next episode
-    // (onDismiss fires after this bottom sheet closes, unlike onResume which never runs because
-    // 1DM shows an overlay instead of pausing this activity).
-    private var batchConfirmPending = false
-    private var batchConfirmEpisode: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -487,12 +484,17 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
                         media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]!!,
                         media!!.userPreferredName
                     )
-                    if (onBatchEpisodeDownloaded != null) {
-                        // Remember we're advancing and let onDismiss open the next selector
-                        // (onDismiss fires once this sheet has fully closed).
-                        batchConfirmPending = true
-                        batchConfirmEpisode =
+                    val onConfirmed = onBatchEpisodeDownloaded
+                    if (onConfirmed != null) {
+                        val epNum =
                             media!!.anime!!.episodes!![media!!.anime!!.selectedEpisode!!]!!.number
+                        // Advance to the next episode's selector after this sheet has closed.
+                        // Use the Activity's looper (survives the view being destroyed by dismiss)
+                        // rather than the sheet's view.
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            Logger.log("BATCH: advancing to next after episode $epNum")
+                            onConfirmed(epNum)
+                        }, 400)
                     }
                     dismiss()
                 } else {
@@ -732,26 +734,6 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
     override fun onSaveInstanceState(outState: Bundle) {}
 
     override fun onDismiss(dialog: DialogInterface) {
-        Logger.log("BATCH: selector onDismiss, batchConfirmPending=$batchConfirmPending")
-        if (batchConfirmPending) {
-            batchConfirmPending = false
-            val epNum = batchConfirmEpisode
-            val onConfirmed = onBatchEpisodeDownloaded
-            if (epNum != null && onConfirmed != null) {
-                // Advance to the next episode's selector after this sheet has fully closed.
-                val v = view
-                if (v != null) {
-                    v.post {
-                        Logger.log("BATCH: onDismiss advancing to next after episode $epNum")
-                        onConfirmed(epNum)
-                    }
-                } else {
-                    Logger.log("BATCH: onDismiss view null, cannot advance for $epNum")
-                }
-            } else {
-                Logger.log("BATCH: onDismiss epNum=$epNum onConfirmed=${onConfirmed != null}")
-            }
-        }
         if (launch == false) {
             activity?.hideSystemBars()
             model.epChanged.postValue(true)
