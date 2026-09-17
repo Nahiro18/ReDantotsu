@@ -418,16 +418,19 @@ class AnimeWatchFragment : Fragment() {
      */
     private fun openNextBatchDownloader() {
         val queue = batchQueue ?: return
+        Logger.log("BATCH: openNextBatchDownloader queue=$queue")
         if (queue.isEmpty()) {
             batchQueue = null
             episodeAdapter.exitBatchMode()
             binding.batchBar.isVisible = false
+            Logger.log("BATCH: queue empty, exiting batch mode")
             return
         }
         val epNum = queue.removeAt(0)
         val ep = media.anime?.episodes?.get(epNum)
         if (ep == null) {
             snackString("Episode $epNum not found")
+            Logger.log("BATCH: episode $epNum not found")
             openNextBatchDownloader()
             return
         }
@@ -439,8 +442,16 @@ class AnimeWatchFragment : Fragment() {
             null,
             isDownload = true
         )
-        selector.onBatchEpisodeDownloaded = { openNextBatchDownloader() }
-        selector.show(manager, "dialog")
+        selector.onBatchEpisodeDownloaded = {
+            Logger.log("BATCH: episode $epNum download confirmed, advancing")
+            openNextBatchDownloader()
+        }
+        try {
+            selector.show(manager, "dialog")
+            Logger.log("BATCH: showed selector for episode $epNum")
+        } catch (e: Exception) {
+            Logger.log("BATCH: failed to show selector for $epNum: ${e.message}")
+        }
     }
 
     fun openSettings(pkg: AnimeExtension.Installed) {

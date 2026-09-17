@@ -732,6 +732,7 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
     override fun onSaveInstanceState(outState: Bundle) {}
 
     override fun onDismiss(dialog: DialogInterface) {
+        Logger.log("BATCH: selector onDismiss, batchConfirmPending=$batchConfirmPending")
         if (batchConfirmPending) {
             batchConfirmPending = false
             val epNum = batchConfirmEpisode
@@ -741,9 +742,14 @@ class SelectorDialogFragment : BottomSheetDialogFragment() {
                 val v = view
                 if (v != null) {
                     v.post {
+                        Logger.log("BATCH: onDismiss advancing to next after episode $epNum")
                         onConfirmed(epNum)
                     }
+                } else {
+                    Logger.log("BATCH: onDismiss view null, cannot advance for $epNum")
                 }
+            } else {
+                Logger.log("BATCH: onDismiss epNum=$epNum onConfirmed=${onConfirmed != null}")
             }
         }
         if (launch == false) {
